@@ -70,10 +70,6 @@ python AudioDelayDetector.py
 # 🎵 Audio Delay Detector v1.0
 *Milisaniye hassasiyetinde ses senkronizasyonu ve dublaj hizalama için profesyonel çözüm.*
 
-![Dil](https://img.shields.io/badge/Dil-Python_3.x-blue?style=for-the-badge&logo=python)
-![Platform](https://img.shields.io/badge/Platform-Windows_|_macOS_|_Linux-cyan?style=for-the-badge)
-![Lisans](https://img.shields.io/badge/Lisans-MIT-green?style=for-the-badge)
-
 <br>
 
 ![Audio Delay Detector](assets/AudioDelayTR.png)
