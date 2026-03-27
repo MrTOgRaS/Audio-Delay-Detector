@@ -155,6 +155,7 @@ python AudioDelayDetector.py
 `NumPy` · `SciPy` · `pydub` · `soundfile` · `librosa` · `FFmpeg` · `Tkinter`
 
 ---
+[![Support Me](https://img.shields.io/badge/Support_My_Work-❤️_Click_Here-ea4335?style=for-the-badge)](https://mrtogras.com/support/)
 
 **Developer:** [Murat Ogras](https://www.mrtogras.com) · [GitHub](https://github.com/MrTOgRaS) ·
 
