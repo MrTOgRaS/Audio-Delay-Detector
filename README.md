@@ -1,119 +1,163 @@
 <div align="center">
 
 # 🎵 Audio Delay Detector v1.0
-*The ultimate tool for precise audio synchronization & dubbing alignment.*
 
-![Language](https://img.shields.io/badge/Language-Python_3.x-blue?style=for-the-badge&logo=python)
-![Platform](https://img.shields.io/badge/Platform-Windows-blue?style=for-the-badge&logo=windows)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-    <img src="https://img.shields.io/badge/Hassasiyet-1ms-green?style=for-the-badge&logo=opsgenie" alt="1ms Hassasiyet">
-    <img src="https://img.shields.io/badge/Motor-DSP_%26_Onset-blue?style=for-the-badge&logo=python" alt="DSP Motoru">
-    <div align="center">
-  </p>
-</div>
-<br>
+**Precise audio synchronization & dubbing alignment tool**
 
-[**🇬🇧 English**](#english) • [**🇹🇷 Türkçe**](#türkçe)
+[![Language](https://img.shields.io/badge/Python-3.x-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![Platform](https://img.shields.io/badge/Windows-10%2F11-0078D6?style=for-the-badge&logo=windows&logoColor=white)](../../releases)
+[![License](https://img.shields.io/badge/License-MIT-2ea44f?style=for-the-badge)](LICENSE)
+[![Precision](https://img.shields.io/badge/Precision-1ms-FF6B35?style=for-the-badge)](../../releases)
+[![Engines](https://img.shields.io/badge/Engines-7%20×%203%20Modes-8B5CF6?style=for-the-badge)](../../releases)
+
+[**🇬🇧 English**](#-english) · [**🇹🇷 Türkçe**](#-türkçe)
 
 <br>
 
-![Audio Delay Detector](assets/AudioDelayENG.png)
+<img src="assets/AudioDelayENG.png" alt="Audio Delay Detector" width="800">
 
 </div>
 
 ---
 
-<a name="english"></a>
+<a name="-english"></a>
+
 ## 🇬🇧 English
 
-> **Audio Delay Detector** is a lightweight, modern desktop tool that calculates the delay (offset) between two audio files with **millisecond precision**. Designed for dubbing, post-production, and broadcast workflows, it eliminates the guesswork without needing to re-encode your files.
+> **Audio Delay Detector** calculates the delay (offset) between two audio files with **millisecond precision**. Built for dubbing, post-production, and broadcast workflows — no re-encoding needed.
 
-### ✨ Key Features
-- ⏱️ **Millisecond Precision:** Detects even sub-frame audio offsets perfectly.
-- 🧠 **Smart Analysis Engines:** Powered by multiple advanced DSP algorithms (GCC-PHAT, Micro-Rhythm RMS, Onset Extraction).
-- 🎞️ **Wide Format Support:** Works directly with MKV, MP4, AC3, EAC3, DTS, MP3, FLAC, AAC, WAV, and more *(via FFmpeg)*.
-- 🎯 **Manual & Auto Modes:** Features "Smart Chunking" for long movies and ultra-precise "Micro-Rhythm" mapping for short manual selections.
-- 🌓 **Modern UI:** A clean, dark-themed Tkinter dashboard.
-- 💾 **Persistent Configurations:** Remembers your FFmpeg paths and language preferences automatically.
+### ✨ Features
 
-### ⚙️ Analysis Engines
+| | Feature | Description |
+|---|---|---|
+| ⏱️ | **1ms Precision** | Detects sub-frame audio offsets with Micro-Rhythm mapping |
+| 🧠 | **7 Analysis Engines** | GCC-PHAT, Envelope, NumPy FFT, SciPy, Multi Feature, 2-Pass & Smart Rhythm |
+| 🎯 | **Manual Search** | Select any segment, search ±10 min range in dubbed audio |
+| 🎞️ | **Wide Format Support** | MKV, MP4, AVI, MOV, WMV, MP3, FLAC, AAC, AC3, EAC3, DTS, WAV |
+| 📊 | **Drift Detection** | Analyzes 3 segments to detect progressive audio drift |
+| 🌍 | **Bilingual UI** | Turkish / English with one-click switch |
+| 🎬 | **3 Film Modes** | Old Films, Animations, New Films — optimized for each |
+| 💾 | **Persistent Config** | Remembers FFmpeg paths and language preference |
+
+### ⚙️ Engines
+
 | Engine | Best For | Description |
 |---|---|---|
-| **GCC-PHAT Segmented** | Identical Sources | Phase Transform cross-correlation. Great for exact matches. |
-| **Envelope XCorr** | Different Languages | RMS energy envelope correlation. Perfect for dubbing. |
-| **Multi-Feature** | Complex Audio | Combines Onset, HPSS, and Chromagram features. |
-| **⭐ Smart Auto** | Full Movies | Smart chunking + Syllable Rhythm matching. Super fast and accurate. |
+| **GCC-PHAT** | Identical sources | Phase Transform cross-correlation |
+| **Envelope XCorr** | Different languages | RMS energy envelope correlation |
+| **NumPy FFT** | General purpose | Fast Fourier Transform based |
+| **SciPy** | High accuracy | Scientific signal processing |
+| **Multi-Feature** | Complex audio | Onset + HPSS + Chromagram fusion |
+| **2-Pass** | Long files | Two-stage refinement |
+| **⭐ Smart Rhythm** | Full movies | Smart chunking + RMS rhythm matching |
 
-### 🛠️ Installation & Usage
+### 📥 Installation
 
-**1. Download the Portable Release:**
-Go to the [Releases](../../releases) tab and download `AudioDelayDetector_v1.0.exe`.
+**Option 1 — Portable EXE (recommended):**
 
-**2. Running from Source:**
-Make sure you have [FFmpeg](https://ffmpeg.org/download.html) installed on your system.
+Download `AudioDelayDetector.exe` from [**Releases**](../../releases) — single file, no installation needed.
+
+> ⚠️ Windows SmartScreen may show a warning on first run. Click **"More info" → "Run anyway"**.
+
+**Option 2 — Run from source:**
 
 ```bash
-# Clone the repository
-git clone [https://github.com/MrTOgRaS/AudioDelayDetector.git](https://github.com/MrTOgRaS/AudioDelayDetector.git)
+git clone https://github.com/MrTOgRaS/AudioDelayDetector.git
 cd AudioDelayDetector
 
-# Install required Python libraries
 pip install numpy scipy librosa pydub soundfile
 
-# Run the app
 python AudioDelayDetector.py
 ```
-<a name="türkçe"></a>
-## 🇹🇷 Türkçe Tanıtım
-<div align="center">
 
-# 🎵 Audio Delay Detector v1.0
-*Milisaniye hassasiyetinde ses senkronizasyonu ve dublaj hizalama için profesyonel çözüm.*
+> [FFmpeg](https://ffmpeg.org/download.html) is optional but recommended for full format support.
 
-<br>
+### 🚀 Usage
 
-![Audio Delay Detector](assets/AudioDelayTR.png)
-
-</div>
+1. Select the **original audio** (main language)
+2. Select the **dubbed audio** (secondary language)
+3. Choose engine & mode → click **Start**
+4. Apply the delay value in your editor (MKVToolNix, Premiere, DaVinci, etc.)
 
 ---
 
-## 📝 Proje Açıklaması
+<a name="-türkçe"></a>
 
-**Audio Delay Detector**, iki ses dosyası arasındaki zaman farkını (offset) **milisaniye hassasiyetinde** hesaplayan hafif ve modern bir masaüstü aracıdır. Dublaj, post-prodüksiyon ve yayın iş akışları için tasarlanmıştır. Dosyalarınızı yeniden kodlamanıza (re-encode) gerek kalmadan saniyeler içinde kesin sonucu verir.
+## 🇹🇷 Türkçe
 
-### ✨ Öne Çıkan Özellikler
-- ⏱️ **Milisaniye Hassasiyeti:** Kare altı (sub-frame) ses gecikmelerini bile kusursuz şekilde tespit eder.
-- 🧠 **Akıllı Analiz Motorları:** Gelişmiş DSP algoritmaları (GCC-PHAT, Mikro-Ritim RMS, Onset Vuruş Çıkarımı) ile güçlendirilmiştir.
-- 🎞️ **Geniş Format Desteği:** MKV, MP4, AC3, EAC3, DTS, MP3, FLAC, AAC, WAV ve daha fazlasıyla doğrudan çalışır.
-- 🎯 **Manuel ve Otomatik Modlar:** Uzun filmler için "Akıllı Kesit" ve kısa seçimler için ultra hassas "Mikro-Ritim" eşleştirme özelliği.
-- 🌓 **Modern Arayüz:** Şık ve temiz, koyu tema (Dark Mode) Tkinter paneli.
-- 💾 **Kalıcı Yapılandırmalar:** FFmpeg yollarınızı ve dil tercihlerinizi otomatik olarak hatırlar.
+<div align="center">
 
-### ⚙️ Analiz Motorları
+<img src="assets/AudioDelayTR.png" alt="Audio Delay Detector" width="800">
+
+</div>
+
+> **Audio Delay Detector**, iki ses dosyası arasındaki gecikmeyi **milisaniye hassasiyetinde** hesaplayan masaüstü aracıdır. Dublaj, post-prodüksiyon ve yayın iş akışları için tasarlanmıştır.
+
+### ✨ Özellikler
+
+| | Özellik | Açıklama |
+|---|---|---|
+| ⏱️ | **1ms Hassasiyet** | Mikro-Ritim haritalaması ile kare altı gecikme tespiti |
+| 🧠 | **7 Analiz Motoru** | GCC-PHAT, Envelope, NumPy FFT, SciPy, Multi Feature, 2-Pass & Akıllı Ritim |
+| 🎯 | **Manuel Arama** | Herhangi bir bölümü seç, dublajda ±10 dk aralığında ara |
+| 🎞️ | **Geniş Format Desteği** | MKV, MP4, AVI, MOV, WMV, MP3, FLAC, AAC, AC3, EAC3, DTS, WAV |
+| 📊 | **Kayma Tespiti** | 3 segmentte ilerleyen ses kaymasını analiz eder |
+| 🌍 | **İki Dilli Arayüz** | Türkçe / İngilizce tek tıkla geçiş |
+| 🎬 | **3 Film Modu** | Eski Filmler, Animasyonlar, Yeni Filmler |
+| 💾 | **Kalıcı Ayarlar** | FFmpeg yolları ve dil tercihi otomatik hatırlanır |
+
+### ⚙️ Motorlar
+
 | Motor | En İyi Kullanım | Açıklama |
 |---|---|---|
-| **GCC-PHAT Segmented** | Aynı Kaynaklar | Faz dönüşümlü çapraz korelasyon. Tam eşleşmeler için idealdir. |
-| **Envelope XCorr** | Farklı Diller | RMS enerji zarfı korelasyonu. Dublaj senkronizasyonu için mükemmeldir. |
-| **Multi-Feature** | Karmaşık Sesler | Onset, HPSS ve Chromagram özelliklerini birleştirir. |
-| **⭐ Akıllı Otomatik** | Tam Filmler | Akıllı kesitleme + Hece Ritim eşleştirme. Çok hızlı ve doğru. |
+| **GCC-PHAT** | Aynı kaynaklar | Faz dönüşümlü çapraz korelasyon |
+| **Envelope XCorr** | Farklı diller | RMS enerji zarfı korelasyonu |
+| **NumPy FFT** | Genel amaç | Hızlı Fourier Dönüşümü tabanlı |
+| **SciPy** | Yüksek doğruluk | Bilimsel sinyal işleme |
+| **Multi-Feature** | Karmaşık ses | Onset + HPSS + Chromagram birleşimi |
+| **2-Pass** | Uzun dosyalar | İki aşamalı iyileştirme |
+| **⭐ Akıllı Ritim** | Tam filmler | Akıllı kesitleme + RMS ritim eşleştirme |
 
-### 🛠️ Kurulum ve Kullanım
+### 📥 Kurulum
 
-**1. Hazır Sürümü İndirin:**
-Sağ taraftaki **Releases** sekmesine gidin ve `AudioDelayDetector_v1.0.exe` dosyasını indirin.
+**Seçenek 1 — Portable EXE (önerilen):**
 
-**2. Kaynak Koddan Çalıştırma:**
-Sisteminizde [FFmpeg](https://ffmpeg.org/download.html) kurulu olduğundan emin olun.
+[**Releases**](../../releases) sayfasından `AudioDelayDetector.exe` dosyasını indirin — tek dosya, kurulum gerektirmez.
+
+> ⚠️ İlk çalıştırmada Windows SmartScreen uyarısı gösterebilir. **"Daha fazla bilgi" → "Yine de çalıştır"** tıklayın.
+
+**Seçenek 2 — Kaynak koddan çalıştırma:**
 
 ```bash
-# Repoyu klonlayın
-git clone [https://github.com/MrTOgRaS/AudioDelayDetector.git](https://github.com/MrTOgRaS/AudioDelayDetector.git)
+git clone https://github.com/MrTOgRaS/AudioDelayDetector.git
 cd AudioDelayDetector
 
-# Gerekli Python kütüphanelerini yükleyin
 pip install numpy scipy librosa pydub soundfile
 
-# Uygulamayı çalıştırın
 python AudioDelayDetector.py
+```
 
+> [FFmpeg](https://ffmpeg.org/download.html) isteğe bağlıdır ancak tam format desteği için önerilir.
+
+### 🚀 Kullanım
+
+1. **Ana ses** dosyasını seçin (orijinal dil)
+2. **Dublaj ses** dosyasını seçin (ikinci dil)
+3. Motor ve mod seçin → **Başlat**'a tıklayın
+4. Gecikme değerini editörünüzde uygulayın (MKVToolNix, Premiere, DaVinci, vb.)
+
+---
+
+<div align="center">
+
+### 🛠️ Built With
+
+`NumPy` · `SciPy` · `pydub` · `soundfile` · `librosa` · `FFmpeg` · `Tkinter`
+
+---
+
+**Developer:** [Murat Oğraş](https://www.mrtogras.com) · [GitHub](https://github.com/MrTOgRaS) · [destek@mrtogras.com](mailto:destek@mrtogras.com)
+
+**License:** [MIT](LICENSE)
+
+</div>
