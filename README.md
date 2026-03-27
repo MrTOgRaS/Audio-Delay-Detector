@@ -4,16 +4,20 @@
 *The ultimate tool for precise audio synchronization & dubbing alignment.*
 
 ![Language](https://img.shields.io/badge/Language-Python_3.x-blue?style=for-the-badge&logo=python)
-![Platform](https://img.shields.io/badge/Platform-Windows_|_macOS_|_Linux-cyan?style=for-the-badge)
+![Platform](https://img.shields.io/badge/Platform-Windows-blue?style=for-the-badge&logo=windows)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-
+    <img src="https://img.shields.io/badge/Hassasiyet-1ms-green?style=for-the-badge&logo=opsgenie" alt="1ms Hassasiyet">
+    <img src="https://img.shields.io/badge/Motor-DSP_%26_Onset-blue?style=for-the-badge&logo=python" alt="DSP Motoru">
+    <div align="center">
+  </p>
+</div>
 <br>
 
 [**🇬🇧 English**](#english) • [**🇹🇷 Türkçe**](#türkçe)
 
 <br>
 
-*(📸 Projenin ekran görüntüsünü buraya ekleyebilirsiniz: `![Ekran Görüntüsü](screenshot.png)`)*
+![Audio Delay Detector](assets/AudioDelayENG.png)
 
 </div>
 
@@ -72,7 +76,7 @@ python AudioDelayDetector.py
 
 <br>
 
-![Audio Delay Detector Banner](https://raw.githubusercontent.com/MrTOgRaS/AudioDelayDetector/main/assets/banner_tr.png)
+![Audio Delay Detector](assets/AudioDelayTR.png)
 
 </div>
 
