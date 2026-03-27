@@ -156,7 +156,7 @@ python AudioDelayDetector.py
 
 ---
 
-**Developer:** [Murat Oğraş](https://www.mrtogras.com) · [GitHub](https://github.com/MrTOgRaS) · [destek@mrtogras.com](mailto:destek@mrtogras.com)
+**Developer:** [Murat Ogras](https://www.mrtogras.com) · [GitHub](https://github.com/MrTOgRaS) ·
 
 **License:** [MIT](LICENSE)
 
