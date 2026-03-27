@@ -57,9 +57,10 @@ cd AudioDelayDetector
 pip install numpy scipy librosa pydub soundfile
 
 # Run the app
-python main.py
+python AudioDelayDetector.py
 ```
-
+<a name="türkçe"></a>
+## 🇹🇷 Türkçe Tanıtım
 <div align="center">
 
 # 🎵 Audio Delay Detector v1.0
@@ -114,5 +115,5 @@ cd AudioDelayDetector
 pip install numpy scipy librosa pydub soundfile
 
 # Uygulamayı çalıştırın
-python main.py
+python AudioDelayDetector.py
 
