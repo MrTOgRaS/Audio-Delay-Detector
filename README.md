@@ -51,6 +51,13 @@
 | **2-Pass** | Long files | Two-stage refinement |
 | **⭐ Smart Rhythm** | Full movies | Smart chunking + RMS rhythm matching |
 
+---
+
+> [!NOTE]
+> The core synchronization engine (FFT, GCC-PHAT, RMS correlation) is natively integrated and developed by **MrTOgRaS**. External tools like **FFmpeg** are only used for audio extraction via user-defined paths.
+
+---
+
 ### 📥 Installation
 
 **Option 1 — Portable EXE (recommended):**
