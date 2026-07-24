@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎵 Audio Delay Detector v1.1
+# 🎵 Audio Delay Detector v1.2
 
 **Precise audio synchronization & dubbing alignment tool**
 
@@ -33,6 +33,7 @@
 | ⏱️ | **1ms Precision** | Detects sub-frame audio offsets with Micro-Rhythm mapping |
 | 🧠 | **7 Analysis Engines** | GCC-PHAT, Envelope, NumPy FFT, SciPy, Multi Feature, 2-Pass & Smart Rhythm |
 | 🎯 | **Manual Search** | Select any segment, search ±10 min range in dubbed audio |
+| ⚡ | **Quick Analysis** | One-click v1.0-style scan, right next to Start Analysis |
 | 🎞️ | **Wide Format Support** | MKV, MP4, AVI, MOV, WMV, MP3, FLAC, AAC, AC3, EAC3, DTS, WAV |
 | 📊 | **Drift Detection** | Analyzes 3 segments to detect progressive audio drift |
 | 🌍 | **Bilingual UI** | Turkish / English with one-click switch |
@@ -107,6 +108,7 @@ python AudioDelayDetector.py
 | ⏱️ | **1ms Hassasiyet** | Mikro-Ritim haritalaması ile kare altı gecikme tespiti |
 | 🧠 | **7 Analiz Motoru** | GCC-PHAT, Envelope, NumPy FFT, SciPy, Multi Feature, 2-Pass & Akıllı Ritim |
 | 🎯 | **Manuel Arama** | Herhangi bir bölümü seç, dublajda ±10 dk aralığında ara |
+| ⚡ | **Hızlı Analiz** | Analizi Başlat'ın yanında, v1.0 tarzı tek tıkla hızlı tarama |
 | 🎞️ | **Geniş Format Desteği** | MKV, MP4, AVI, MOV, WMV, MP3, FLAC, AAC, AC3, EAC3, DTS, WAV |
 | 📊 | **Kayma Tespiti** | 3 segmentte ilerleyen ses kaymasını analiz eder |
 | 🌍 | **İki Dilli Arayüz** | Türkçe / İngilizce tek tıkla geçiş |
