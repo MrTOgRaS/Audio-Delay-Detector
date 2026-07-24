@@ -1,30 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-╔══════════════════════════════════════╗
-║   Audio Delay Detector  v1.1        ║
-║   Developer   : MrTOgRaS            ║
-║   WEB         : www.mrtogras.com    ║
-║   Mail        : destek@mrtogras.com ║
-╚══════════════════════════════════════╝
-
-7 Motor  ×  3 Mod  =  21 Kombinasyon
-─────────────────────────────────────
-Motorlar:
-  1. GCC-PHAT Segmented
-  2. Envelope XCorr
-  3. NumPy FFT XCorr
-  4. SciPy XCorr
-  5. Çoklu Özellik (Onset+HPSS+Chroma)
-  6. 2 Aşamalı (RMS + İnce FFT)
-  7. ⭐ Otomatik Akıllı Analiz (VAD + Enerji + HPSS + Onset + Drift)
-
-Modlar:
-  🎬 Eski Filmler  — konuşma bastırma ON (300-3500 Hz sıfırlanır)
-  🎨 Animasyonlar  — hafif konuşma bastırma (500-3000 Hz)
-  🎥 Yeni Filmler  — ön-işleme yok (M&E track paylaşılır)
-"""
-
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, scrolledtext
 import threading
@@ -41,7 +14,6 @@ import urllib.request
 import numpy as np
 from scipy import signal
 
-# ── Opsiyonel kütüphaneler ────────────────────────────────────────────────────
 try:
     import librosa
     LIBROSA_AVAILABLE = True
@@ -60,46 +32,38 @@ try:
 except ImportError:
     SOUNDFILE_AVAILABLE = False
 
-# ── Sürüm Bilgisi ──
-CURRENT_VERSION_NUM = 1.1
+CURRENT_VERSION_NUM = 1.2
 
-# ══════════════════════════════════════════════════════════════════════════════
-#  ÇOK DİLLİ SİSTEM (EN / TR)
-# ══════════════════════════════════════════════════════════════════════════════
 STRINGS = {
     "tr": {
-        # Başlık
-        "app_title": "🎵  Audio Delay Detector  v1.1  —  MrTOgRaS",
+        "app_title": "🎵  Audio Delay Detector  v1.2  —  MrTOgRaS",
         "header_title": "🎵  Audio Delay Detector",
-        "header_version": " v1.1",
-        # Dosya kartları
+        "header_version": " v1.2",
         "main_audio": "🔊  Ana Ses / Video",
         "main_audio_sub": "Film dosyası (MKV/MP4) veya ses dosyası",
         "dub_audio": "🎤  Dublaj Ses",
         "dub_audio_sub": "Gecikme tespiti yapılacak dosya",
         "file_not_selected": "Dosya seçilmedi",
         "btn_select": "📂 Seç",
-        # Motor & Mod
         "engine_label": "⚙️  Motor :",
         "mode_old": "Eski Filmler",
         "mode_anim": "Animasyonlar",
         "mode_new": "Yeni Filmler",
-        # Butonlar
         "btn_start": "▶   Analizi Başlat",
+        "btn_quick": "⚡  Hızlı Analiz",
+        "btn_quick_running": "⚡  Hızlı analiz...",
         "btn_cancel": "⏹  İptal",
         "btn_analyzing": "⏳  Analiz ediliyor...",
         "btn_about": "ℹ️  Hakkında",
         "btn_ffmpeg": "⚙️  FFmpeg Ayarları",
         "btn_lang": "🌐 EN",
-        # Sonuç kutuları
         "results_title": "📊  Analiz Sonuçları",
         "res_delay": "Gecikme (ms)",
         "res_format": "Süre Formatı",
+        "unit_sec": "sn",
         "res_direction": "Gecikme Yönü",
         "res_engine": "Kullanılan Motor",
-        # Log
         "log_title": "📋  Durum Logu",
-        # FFmpeg
         "ffmpeg_set": "✅  FFmpeg  →  ",
         "ffmpeg_not_set": "⚠️  FFmpeg yolu ayarlanmadı — AC3/EAC3/DTS/MKV için gerekli  [ ⚙️ FFmpeg Ayarları ]",
         "ffmpeg_settings_title": "FFmpeg Ayarları",
@@ -111,17 +75,14 @@ STRINGS = {
         "ffmpeg_save": "  Kaydet & Kapat  ",
         "ffmpeg_saved": "✅  FFmpeg ayarları kaydedildi.",
         "ffmpeg_save_err": "⚠️  Config kaydedilemedi: ",
-        # Dosya seçiciler
         "pick_main": "Ana Ses / Video Seç",
         "pick_dub": "Dublaj Ses Seç",
         "pick_ffmpeg": " Seç",
         "main_selected": "Ana ses seçildi: ",
         "dub_selected": "Dublaj ses seçildi: ",
-        # Uyarılar
         "warn_no_main": "Lütfen Ana Ses / Video dosyasını seçin!",
         "warn_no_dub": "Lütfen Dublaj Ses dosyasını seçin!",
         "warn_title": "Uyarı",
-        # Bağımlılık
         "dep_check": "─── Bağımlılık Kontrolü ─────────────────────────────",
         "dep_ready": "Hazır — 7 motor × 3 mod. Dosya seçin ve başlatın.",
         "dep_librosa_ok": "✅  librosa",
@@ -132,7 +93,6 @@ STRINGS = {
         "dep_sf_fail": "⚠️  soundfile  →  pip install soundfile",
         "dep_ffmpeg_ok": "✅  FFmpeg  →  {}",
         "dep_ffmpeg_fail": "⚠️  FFmpeg  →  ⚙️ FFmpeg Ayarları butonundan yolu girin",
-        # Analiz
         "loading_main": "Ana ses yükleniyor...",
         "loading_dub": "Dublaj ses yükleniyor...",
         "diff_sr": "⚠️  Farklı sample rate ({} ≠ {}) → yeniden örnekleniyor...",
@@ -153,7 +113,6 @@ STRINGS = {
         "cancelled": "⛔  Analiz iptal edildi.",
         "error": "❌  Hata: ",
         "unknown_engine": "Bilinmeyen motor: ",
-        # Motorlar
         "eng_gcc": "── Motor: GCC-PHAT Segmented ──",
         "eng_env": "── Motor: Envelope XCorr ──",
         "eng_numpy": "── Motor: NumPy FFT XCorr ──",
@@ -162,7 +121,6 @@ STRINGS = {
         "eng_two": "── Motor: 2 Aşamalı (RMS + İnce FFT) ──",
         "eng_auto_title": "⭐ Motor: Otomatik Akıllı Analiz",
         "eng_auto_raw": "  Sinyaller inceleniyor...",
-        # Auto motor
         "vad_title": "─── Yöntem 1: VAD Sessizlik Deseni ───",
         "vad_desc": "  Zamanlama analiz ediliyor...",
         "vad_result": "  VAD deseni: {:+d} ms  (güvenilirlik: {:.1f})",
@@ -198,7 +156,6 @@ STRINGS = {
         "sync_warn_r3": "    • Ses dosyaları aynı içeriğe ait değil",
         "final_result": "📌 Final sonuç: {:+d} ms",
         "drift_active": "  ⚠️ Drift uyarısı aktif — sonuç güvenilir olmayabilir",
-        # Yükleme
         "load_video": "  📦 {} — FFmpeg subprocess ile çıkarılıyor...",
         "load_video_reason": "video dosyası",
         "load_large_reason": "büyük dosya ({:.1f} GB)",
@@ -216,8 +173,11 @@ STRINGS = {
         "first_min": "  Ana ses: ilk {} dk ({:.0f}s)",
         "dub_min": "  Dublaj: ilk {} dk ({:.0f}s)",
         "sample_info": "  → {:.2f} sn  |  {} Hz  |  {:,} örnek",
-        # Manuel Arama
         "manual_title": "🎯  Manuel Arama",
+        "quick_title": "⚡  Hızlı Analiz",
+        "quick_log_start": "─── ⚡ Hızlı Analiz (10:00'dan 30 sn kesit + ±10 dk tarama) ───",
+        "analysis_no_audio": "⚠️ HATA: Analiz edilecek bölgede yeterli/geçerli ses bulunamadı! (Dosya çok kısa veya sessiz olabilir)",
+        "analysis_reload_zero": "⚠️ Dosyalardan biri 10 dakikadan kısa görünüyor, ikisi de baştan (0:00) hizalı olarak yeniden yükleniyor...",
         "manual_desc": "Özel analiz aralığı belirle (Hedef bölge araması veya Aralık kıyaslama)",
         "manual_start": "Başlangıç :",
         "manual_end": "Bitiş :",
@@ -247,12 +207,10 @@ STRINGS = {
         "manual_dir_right": "Sağa İtele (Dublaj Erken) ▶",
         "manual_dir_sync": "✅ Senkronize",
         "analysis_rms_extract": "Ses şiddet haritaları (M&E Zarfı) çıkarılıyor...",
-        # Desteklenen formatlar
         "fmt_all": "Tüm Desteklenen",
         "fmt_video": "Video Dosyaları",
         "fmt_audio": "Ses Dosyaları",
         "fmt_any": "Tüm Dosyalar",
-        # Hakkında
         "about_title": "Hakkında",
         "about_version": f"Versiyon {CURRENT_VERSION_NUM}  —  MrTOgRaS",
         "about_dev": "Geliştirici",
@@ -264,7 +222,7 @@ STRINGS = {
         "about_libs": "Kullanılan Kütüphaneler",
         "about_formats": "Desteklenen Formatlar",
         "about_combo": "7 Motor  ×  3 Mod  =  21 Kombinasyon",
-        "about_modes_old": "🎬 Eski Filmler (Diyalog %100 Bastırılır)",
+        "about_modes_old": "🎬 Eski Filmler (Diyalog Büyük Ölçüde Bastırılır)",
         "about_modes_anim": "🎨 Animasyonlar (Diyalog %75 Bastırılır)",
         "about_modes_new": "🎥 Yeni Filmler (Bastırma yok - Raw)",
         "about_close": "  Kapat  ",
@@ -275,47 +233,41 @@ STRINGS = {
         "about_engines": "Motorlar",
         "about_modes": "Modlar",
         "engine_smart_rhythm": "⭐ Akıllı Ritim (M&E RMS)",
-        # MIT Lisansı
         "mit_title": "MIT Lisansı",
-        # Güncelleme
         "update_title": "Güncelleme Kontrolü",
         "update_available": "🎉 Yeni bir sürüm mevcut! (v{})\n\nİndirme sayfasına gitmek ister misiniz?",
         "update_latest": "✅ Zaten en güncel sürümü (v{}) kullanıyorsunuz.",
         "update_error": "⚠️ Güncelleme kontrolü sırasında bir hata oluştu.\nİnternet bağlantınızı veya GitHub erişimini kontrol edin.",
     },
     "en": {
-        # Title
-        "app_title": "🎵  Audio Delay Detector  v1.1  —  MrTOgRaS",
+        "app_title": "🎵  Audio Delay Detector  v1.2  —  MrTOgRaS",
         "header_title": "🎵  Audio Delay Detector",
-        "header_version": " v1.1",
-        # File cards
+        "header_version": " v1.2",
         "main_audio": "🔊  Main Audio / Video",
         "main_audio_sub": "Movie file (MKV/MP4) or audio file",
         "dub_audio": "🎤  Dubbed Audio",
         "dub_audio_sub": "File for delay detection",
         "file_not_selected": "No file selected",
         "btn_select": "📂 Browse",
-        # Engine & Mode
         "engine_label": "⚙️  Engine :",
         "mode_old": "Old Films",
         "mode_anim": "Animations",
         "mode_new": "New Films",
-        # Buttons
         "btn_start": "▶   Start Analysis",
+        "btn_quick": "⚡  Quick Analysis",
+        "btn_quick_running": "⚡  Quick analyzing...",
         "btn_cancel": "⏹  Cancel",
         "btn_analyzing": "⏳  Analyzing...",
         "btn_about": "ℹ️  About",
         "btn_ffmpeg": "⚙️  FFmpeg Settings",
         "btn_lang": "🌐 TR",
-        # Result boxes
         "results_title": "📊  Analysis Results",
         "res_delay": "Delay (ms)",
         "res_format": "Time Format",
+        "unit_sec": "sec",
         "res_direction": "Delay Direction",
         "res_engine": "Engine Used",
-        # Log
         "log_title": "📋  Status Log",
-        # FFmpeg
         "ffmpeg_set": "✅  FFmpeg  →  ",
         "ffmpeg_not_set": "⚠️  FFmpeg path not set — required for AC3/EAC3/DTS/MKV  [ ⚙️ FFmpeg Settings ]",
         "ffmpeg_settings_title": "FFmpeg Settings",
@@ -327,17 +279,14 @@ STRINGS = {
         "ffmpeg_save": "  Save & Close  ",
         "ffmpeg_saved": "✅  FFmpeg settings saved.",
         "ffmpeg_save_err": "⚠️  Could not save config: ",
-        # File pickers
         "pick_main": "Select Main Audio / Video",
         "pick_dub": "Select Dubbed Audio",
         "pick_ffmpeg": " Select",
         "main_selected": "Main audio selected: ",
         "dub_selected": "Dubbed audio selected: ",
-        # Warnings
         "warn_no_main": "Please select the Main Audio / Video file!",
         "warn_no_dub": "Please select the Dubbed Audio file!",
         "warn_title": "Warning",
-        # Dependencies
         "dep_check": "─── Dependency Check ─────────────────────────────",
         "dep_ready": "Ready — 7 engines × 3 modes. Select files and start.",
         "dep_librosa_ok": "✅  librosa",
@@ -348,7 +297,6 @@ STRINGS = {
         "dep_sf_fail": "⚠️  soundfile  →  pip install soundfile",
         "dep_ffmpeg_ok": "✅  FFmpeg  →  {}",
         "dep_ffmpeg_fail": "⚠️  FFmpeg  →  Set path in ⚙️ FFmpeg Settings",
-        # Analysis
         "loading_main": "Loading main audio...",
         "loading_dub": "Loading dubbed audio...",
         "diff_sr": "⚠️  Different sample rate ({} ≠ {}) → resampling...",
@@ -369,7 +317,6 @@ STRINGS = {
         "cancelled": "⛔  Analysis cancelled.",
         "error": "❌  Error: ",
         "unknown_engine": "Unknown engine: ",
-        # Engines
         "eng_gcc": "── Engine: GCC-PHAT Segmented ──",
         "eng_env": "── Engine: Envelope XCorr ──",
         "eng_numpy": "── Engine: NumPy FFT XCorr ──",
@@ -378,7 +325,6 @@ STRINGS = {
         "eng_two": "── Engine: 2-Pass (RMS + Fine FFT) ──",
         "eng_auto_title": "⭐ Engine: Automatic Smart Analysis",
         "eng_auto_raw": "  Analyzing signals...",
-        # Auto engine
         "vad_title": "─── Method 1: VAD Silence Pattern ───",
         "vad_desc": "  Analyzing timing...",
         "vad_result": "  VAD pattern: {:+d} ms  (reliability: {:.1f})",
@@ -414,7 +360,6 @@ STRINGS = {
         "sync_warn_r3": "    • Audio files don't belong to same content",
         "final_result": "📌 Final result: {:+d} ms",
         "drift_active": "  ⚠️ Drift warning active — result may be unreliable",
-        # Loading
         "load_video": "  📦 {} — extracting via FFmpeg subprocess...",
         "load_video_reason": "video file",
         "load_large_reason": "large file ({:.1f} GB)",
@@ -432,8 +377,11 @@ STRINGS = {
         "first_min": "  Main audio: first {} min ({:.0f}s)",
         "dub_min": "  Dub: first {} min ({:.0f}s)",
         "sample_info": "  → {:.2f} sec  |  {} Hz  |  {:,} samples",
-        # Manual Search
         "manual_title": "🎯  Manual Search",
+        "quick_title": "⚡  Quick Analysis",
+        "quick_log_start": "─── ⚡ Quick Analysis (30-sec clip @ 10:00 + ±10 min scan) ───",
+        "analysis_no_audio": "⚠️ ERROR: Not enough valid audio found in the analyzed region! (File may be too short or silent)",
+        "analysis_reload_zero": "⚠️ One of the files appears shorter than 10 minutes, reloading both aligned from 0:00...",
         "manual_desc": "Custom analysis range (Target Search or Range Comparison)",
         "manual_start": "Start :",
         "manual_end": "End :",
@@ -463,12 +411,10 @@ STRINGS = {
         "manual_dir_right": "Push Right (Dub Early) ▶",
         "manual_dir_sync": "✅ Synchronized",
         "analysis_rms_extract": "Extracting intensity maps (M&E Envelope)...",
-        # Supported formats
         "fmt_all": "All Supported",
         "fmt_video": "Video Files",
         "fmt_audio": "Audio Files",
         "fmt_any": "All Files",
-        # About
         "about_title": "About",
         "about_version": f"Version {CURRENT_VERSION_NUM}  —  MrTOgRaS",
         "about_dev": "Developer",
@@ -480,7 +426,7 @@ STRINGS = {
         "about_libs": "Libraries Used",
         "about_formats": "Supported Formats",
         "about_combo": "7 Engines  ×  3 Modes  =  21 Combinations",
-        "about_modes_old": "🎬 Old Films (Speech 100% Suppressed)",
+        "about_modes_old": "🎬 Old Films (Dialogue Substantially Suppressed)",
         "about_modes_anim": "🎨 Animations (Speech 75% Suppressed)",
         "about_modes_new": "🎥 New Films (No Suppression - Raw)",
         "about_close": "  Close  ",
@@ -491,9 +437,7 @@ STRINGS = {
         "about_engines": "Engines",
         "about_modes": "Modes",
         "engine_smart_rhythm": "⭐ Smart Rhythm (M&E RMS)",
-        # MIT License
         "mit_title": "MIT License",
-        # Update
         "update_title": "Update Check",
         "update_available": "🎉 A new version is available! (v{})\n\nWould you like to go to the download page?",
         "update_latest": "✅ You are already using the latest version (v{}).",
@@ -523,7 +467,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE."""
 
-# ── Motor tanımları ──────────────────────────────────────────────────────────
 ENGINE_LIST = [
     ("gcc_phat",  "GCC-PHAT Segmented"),
     ("envelope",  "Envelope XCorr"),
@@ -536,17 +479,14 @@ ENGINE_LIST = [
 ENGINE_LABELS = [e[1] for e in ENGINE_LIST]
 ENGINE_KEYS   = [e[0] for e in ENGINE_LIST]
 
-# ── Mod tanımları ────────────────────────────────────────────────────────────
 MODES = [
     ("old",  "🎬"),
     ("anim", "🎨"),
     ("new",  "🎥"),
 ]
 
-# ── Maksimum aranacak gecikme (ms) ──
 MAX_DELAY_MS = 10_000
 
-# ── 18 kombinasyon parametreleri ─────────────────────────────────────────────
 TUNING = {
     ("gcc_phat", "old"):   {"cap_min": 8, "seg_sec": 20,
                             "max_lag_pct": 0.25, "phat_beta": 0.3},
@@ -554,7 +494,7 @@ TUNING = {
                             "max_lag_pct": 0.30, "phat_beta": 0.7},
     ("gcc_phat", "new"):   {"cap_min": 3, "seg_sec": 15,
                             "max_lag_pct": 0.25, "phat_beta": 0.5},
-    ("envelope", "old"):   {"cap_min": 5, "frame_ms": 200, "offset_ms": 100},
+    ("envelope", "old"):   {"cap_min": 5, "frame_ms": 200},
     ("envelope", "anim"):  {"cap_min": 3, "frame_ms": 150},
     ("envelope", "new"):   {"cap_min": 3, "frame_ms": 100},
     ("numpy_fft", "old"):  {"cap_min": 5},
@@ -577,11 +517,9 @@ TUNING = {
                             "env_frame_ms": 100, "drift_check": True},
 }
 
-# ── Config dosyası ───────────────────────────────────────────────────────────
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                            "add_config.json")
 
-# ── Renk paleti ─────────────────────────────────────────────────────────────
 BG     = "#0d1117"
 CARD   = "#161b22"
 ACCENT = "#58a6ff"
@@ -594,9 +532,6 @@ YELLOW = "#d29922"
 BTN_BG = "#21262d"
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# ÖZEL ZAMAN GİRİŞ KUTUSU (0:00:00) : SİLİNMESİNİ ENGELLER
-# ══════════════════════════════════════════════════════════════════════════════
 class TimeBox(tk.Frame):
     def __init__(self, parent, default_val="0:00:00", bg_color=BTN_BG, fg_color=TEXT):
         super().__init__(parent, bg=bg_color)
@@ -663,8 +598,6 @@ class AudioDelayApp:
         self.mode_btns    = {}
         self._cancelled   = False
         self._analysis_thread = None
-
-        # UI referansları (dil değişimi için)
         self._ui_refs = {}
 
         self._load_config()
@@ -673,9 +606,18 @@ class AudioDelayApp:
         self._build_ui()
         self._check_deps()
 
-    # ── Çeviri ─────────────────────────────────────────────────────────────
     def t(self, key):
         return STRINGS.get(self.lang, STRINGS["tr"]).get(key, key)
+
+    def _asset_path(self, filename):
+        import sys
+        base = sys._MEIPASS if getattr(sys, 'frozen', False) \
+            else os.path.dirname(os.path.abspath(__file__))
+        for candidate in (os.path.join(base, "assets", filename),
+                         os.path.join(base, filename)):
+            if os.path.exists(candidate):
+                return candidate
+        return None
 
     def _get_formats(self):
         return [
@@ -688,7 +630,6 @@ class AudioDelayApp:
             (self.t("fmt_any"), "*.*"),
         ]
 
-    # ── Dil Değiştir ───────────────────────────────────────────────────────
     def _toggle_lang(self):
         self.lang = "en" if self.lang == "tr" else "tr"
         self._save_config()
@@ -705,7 +646,13 @@ class AudioDelayApp:
         refs["header_version"].config(text=self.t("header_version"))
         refs["btn_about"].config(text=self.t("btn_about"))
         refs["btn_ffmpeg"].config(text=self.t("btn_ffmpeg"))
-        refs["btn_lang"].config(text=self.t("btn_lang"))
+        if self._lang_toggle_is_image:
+            img = self._toggle_img_tr if self.lang == "tr" else self._toggle_img_en
+            refs["btn_lang"].itemconfig(self._lang_toggle_item, image=img)
+            refs["lang_lbl_en"].config(fg=TEXT if self.lang == "en" else MUTED)
+            refs["lang_lbl_tr"].config(fg=TEXT if self.lang == "tr" else MUTED)
+        else:
+            refs["btn_lang"].config(text=self.t("btn_lang"))
         refs["card1_title"].config(text=self.t("main_audio"))
         refs["card1_sub"].config(text=self.t("main_audio_sub"))
         refs["card1_btn"].config(text=self.t("btn_select"))
@@ -743,11 +690,15 @@ class AudioDelayApp:
             self.manual_btn.config(text=self.t("manual_searching"))
         else:
             self.manual_btn.config(text=self.t("manual_btn"))
-            
+
+        if self.quick_btn.cget("state") == "disabled":
+            self.quick_btn.config(text=self.t("btn_quick_running"))
+        else:
+            self.quick_btn.config(text=self.t("btn_quick"))
+
         refs["log_title"].config(text=self.t("log_title"))
         self._update_ffmpeg_status_bar()
 
-    # ── Config ────────────────────────────────────────────────────────────────
     def _load_config(self):
         try:
             with open(CONFIG_FILE, "r", encoding="utf-8") as f:
@@ -786,7 +737,6 @@ class AudioDelayApp:
                 os.environ["PATH"] = (ffdir + os.pathsep
                                       + os.environ.get("PATH", ""))
 
-    # ── Stiller ──────────────────────────────────────────────────────────────
     def _setup_styles(self):
         s = ttk.Style()
         s.theme_use("clam")
@@ -800,7 +750,6 @@ class AudioDelayApp:
               foreground=[("readonly", TEXT)])
         s.configure("TProgressbar", troughcolor=BTN_BG, background=ACCENT)
 
-    # ── Ana Arayüz ──────────────────────────────────────────────────────────
     def _build_ui(self):
         main = tk.Frame(self.root, bg=BG, padx=18, pady=14)
         main.pack(fill="both", expand=True)
@@ -818,12 +767,52 @@ class AudioDelayApp:
             bg=BG, fg=MUTED, font=("Segoe UI", 10))
         refs["header_version"].pack(side="left", pady=(7, 0))
 
-        refs["btn_lang"] = tk.Button(
-            hdr, text=self.t("btn_lang"),
-            command=self._toggle_lang,
-            bg=BTN_BG, fg=ACCENT, font=("Segoe UI", 9, "bold"),
-            relief="flat", padx=10, pady=4, cursor="hand2")
-        refs["btn_lang"].pack(side="right", padx=(6, 0))
+        self._toggle_img_en = self._toggle_img_tr = None
+        self._lang_toggle_is_image = False
+        p_en = self._asset_path("lang_toggle_en.png")
+        p_tr = self._asset_path("lang_toggle_tr.png")
+        if p_en and p_tr:
+            try:
+                self._toggle_img_en = tk.PhotoImage(file=p_en)
+                self._toggle_img_tr = tk.PhotoImage(file=p_tr)
+            except Exception:
+                self._toggle_img_en = self._toggle_img_tr = None
+
+        lang_box = tk.Frame(hdr, bg=BG)
+        lang_box.pack(side="right", padx=(6, 0))
+
+        if self._toggle_img_en and self._toggle_img_tr:
+            self._lang_toggle_is_image = True
+            w, h = self._toggle_img_en.width(), self._toggle_img_en.height()
+
+            en_active = TEXT if self.lang == "en" else MUTED
+            tr_active = TEXT if self.lang == "tr" else MUTED
+            refs["lang_lbl_en"] = tk.Label(
+                lang_box, text="EN", bg=BG, fg=en_active,
+                font=("Segoe UI", 10, "bold"), cursor="hand2")
+            refs["lang_lbl_en"].pack(side="left", padx=(0, 8))
+
+            refs["btn_lang"] = tk.Canvas(lang_box, width=w, height=h, bg=BG,
+                                         highlightthickness=0, cursor="hand2")
+            self._lang_toggle_item = refs["btn_lang"].create_image(
+                0, 0, anchor="nw",
+                image=self._toggle_img_tr if self.lang == "tr" else self._toggle_img_en)
+            refs["btn_lang"].pack(side="left")
+
+            refs["lang_lbl_tr"] = tk.Label(
+                lang_box, text="TR", bg=BG, fg=tr_active,
+                font=("Segoe UI", 10, "bold"), cursor="hand2")
+            refs["lang_lbl_tr"].pack(side="left", padx=(8, 0))
+
+            for w_ in (refs["lang_lbl_en"], refs["btn_lang"], refs["lang_lbl_tr"]):
+                w_.bind("<Button-1>", lambda e: self._toggle_lang())
+        else:
+            refs["btn_lang"] = tk.Button(
+                lang_box, text=self.t("btn_lang"),
+                command=self._toggle_lang,
+                bg=BTN_BG, fg=ACCENT, font=("Segoe UI", 9, "bold"),
+                relief="flat", padx=10, pady=4, cursor="hand2")
+            refs["btn_lang"].pack(side="right")
 
         refs["btn_about"] = tk.Button(
             hdr, text=self.t("btn_about"),
@@ -841,14 +830,12 @@ class AudioDelayApp:
 
         tk.Frame(main, bg=BORDER, height=1).pack(fill="x", pady=(0, 12))
 
-        # ── FFmpeg durum ──
         self.ffmpeg_status_bar = tk.Label(
             main, text="", bg=BG, fg=MUTED,
             font=("Segoe UI", 8), anchor="w")
         self.ffmpeg_status_bar.pack(fill="x", pady=(0, 6))
         self._update_ffmpeg_status_bar()
 
-        # ── Dosya Kartları ──
         fc = tk.Frame(main, bg=BG)
         fc.pack(fill="x", pady=(0, 12))
         fc.columnconfigure(0, weight=1)
@@ -858,7 +845,6 @@ class AudioDelayApp:
         self._file_card(fc, "dub_audio", "dub_audio_sub",
                         self.audio2_path, self._pick_audio2, 1, "2")
 
-        # ── Motor Seçimi ──
         eng_card = self._card(main, pady=8)
         eng_card.pack(fill="x", pady=(0, 6))
         eng_row = tk.Frame(eng_card, bg=CARD)
@@ -872,7 +858,6 @@ class AudioDelayApp:
                           values=ENGINE_LABELS)
         cb.pack(side="left", padx=10)
 
-        # ── Mod Seçimi + Başlat ──
         ctrl = self._card(main, pady=8)
         ctrl.pack(fill="x", pady=(0, 12))
 
@@ -904,7 +889,13 @@ class AudioDelayApp:
             relief="flat", padx=22, pady=6, cursor="hand2")
         self.analyze_btn.pack(side="right", padx=(0, 6))
 
-        # ── Manuel Arama Paneli ──
+        self.quick_btn = tk.Button(
+            ctrl, text=self.t("btn_quick"),
+            command=self._start_quick_analysis,
+            bg=YELLOW, fg="white", font=("Segoe UI", 10, "bold"),
+            relief="flat", padx=14, pady=6, cursor="hand2")
+        self.quick_btn.pack(side="right", padx=(0, 6))
+
         self.manual_enabled = tk.BooleanVar(value=False)
         manual_card = self._card(main, pady=8)
         manual_card.pack(fill="x", pady=(0, 10))
@@ -925,10 +916,8 @@ class AudioDelayApp:
             bg=CARD, fg=MUTED, font=("Segoe UI", 8))
         refs["manual_desc"].pack(side="left", padx=(10, 0))
 
-        # İç panel (gizli başlar)
         self._manual_inner = tk.Frame(manual_card, bg=CARD)
         
-        # Radyo Butonları - Arama Tipi
         self.manual_type_var = tk.StringVar(value="compare")
         rb_row = tk.Frame(self._manual_inner, bg=CARD)
         rb_row.pack(fill="x", pady=(8, 4))
@@ -987,7 +976,6 @@ class AudioDelayApp:
             relief="flat", padx=14, pady=4, cursor="hand2")
         self.manual_btn.pack(side="right")
 
-        # ── Sonuç Kutuları (4) ──
         res_card = self._card(main, pady=12)
         res_card.pack(fill="x", pady=(0, 10))
         refs["results_title"] = tk.Label(
@@ -1003,11 +991,9 @@ class AudioDelayApp:
         self.lbl_dir, refs["res_dir_lbl"]    = self._result_box(rg, self.t("res_direction"),  "—",    2)
         self.lbl_eng, refs["res_eng_lbl"]    = self._result_box(rg, self.t("res_engine"),     "—",    3)
 
-        # ── Progress ──
         self.progress = ttk.Progressbar(main, mode="indeterminate")
         self.progress.pack(fill="x", pady=(0, 8))
 
-        # ── Log ──
         log_card = self._card(main, pady=8)
         log_card.pack(fill="both", expand=True)
         refs["log_title"] = tk.Label(
@@ -1024,7 +1010,6 @@ class AudioDelayApp:
                            ("accent", ACCENT), ("default", TEXT)]:
             self.log.tag_configure(tag, foreground=color)
 
-    # ── Mod Değiştirme ───────────────────────────────────────────────────────
     def _set_mode(self, mode):
         self.mode_var.set(mode)
         for key, btn in self.mode_btns.items():
@@ -1033,17 +1018,15 @@ class AudioDelayApp:
             else:
                 btn.configure(bg=BTN_BG, fg=TEXT)
 
-    # ── FFmpeg Durum ─────────────────────────────────────────────────────────
     def _update_ffmpeg_status_bar(self):
-        fp = self.ffmpeg_path.get().strip()
-        if fp and os.path.isfile(fp):
+        fp = self._get_ffmpeg_bin()
+        if fp:
             self.ffmpeg_status_bar.config(
                 text=f"{self.t('ffmpeg_set')}{fp}", fg=GREEN)
         else:
             self.ffmpeg_status_bar.config(
                 text=self.t("ffmpeg_not_set"), fg=YELLOW)
 
-    # ── Widget Yardımcıları ──────────────────────────────────────────────────
     def _card(self, parent, pady=10, padx=14):
         f = tk.Frame(parent, bg=CARD, padx=padx, pady=pady)
         f.configure(highlightbackground=BORDER, highlightthickness=1)
@@ -1090,13 +1073,16 @@ class AudioDelayApp:
         lbl.pack(pady=(2, 0))
         return lbl, lbl_title
 
-    # ── Log ──────────────────────────────────────────────────────────────────
     def _log(self, msg, tag="default"):
-        self.log.configure(state="normal")
         ts = datetime.datetime.now().strftime("%H:%M:%S")
-        self.log.insert("end", f"[{ts}]  {msg}\n", tag)
-        self.log.see("end")
-        self.log.configure(state="disabled")
+
+        def _write():
+            self.log.configure(state="normal")
+            self.log.insert("end", f"[{ts}]  {msg}\n", tag)
+            self.log.see("end")
+            self.log.configure(state="disabled")
+
+        self.root.after(0, _write)
 
     def _check_deps(self):
         self._log(self.t("dep_check"), "accent")
@@ -1116,7 +1102,6 @@ class AudioDelayApp:
             self._log(self.t("dep_ffmpeg_fail"), "warn")
         self._log(self.t("dep_ready"), "default")
 
-    # ── Dosya Seçiciler ──────────────────────────────────────────────────────
     def _pick_audio1(self):
         p = filedialog.askopenfilename(
             title=self.t("pick_main"), filetypes=self._get_formats())
@@ -1133,7 +1118,14 @@ class AudioDelayApp:
             self.info2.config(text=f"✅  {os.path.basename(p)}", fg=GREEN)
             self._log(f"{self.t('dub_selected')}{os.path.basename(p)}", "ok")
 
-    # ── Güncelleme Kontrolü ──────────────────────────────────────────────────
+    @staticmethod
+    def _parse_version(v):
+        parts = []
+        for p in str(v).split("."):
+            digits = "".join(ch for ch in p if ch.isdigit())
+            parts.append(int(digits) if digits else 0)
+        return tuple(parts) if parts else (0,)
+
     def _check_updates(self):
         def check():
             try:
@@ -1143,12 +1135,10 @@ class AudioDelayApp:
                     data = json.loads(response.read().decode())
                     latest_tag = data.get("tag_name", "").replace("v", "").strip()
                 
-                try:
-                    latest_v = float(latest_tag)
-                except ValueError:
-                    latest_v = CURRENT_VERSION_NUM
-                
-                if latest_v > CURRENT_VERSION_NUM:
+                latest_v = self._parse_version(latest_tag)
+                current_v = self._parse_version(str(CURRENT_VERSION_NUM))
+
+                if latest_v > current_v:
                     msg = self.t("update_available").format(latest_tag)
                     self.root.after(0, lambda: self._show_update_dialog(msg, data.get("html_url")))
                 else:
@@ -1156,14 +1146,12 @@ class AudioDelayApp:
             except Exception as e:
                 self.root.after(0, lambda: messagebox.showerror(self.t("update_title"), self.t("update_error")))
 
-        # GUI donmasın diye thread içinde başlat
         threading.Thread(target=check, daemon=True).start()
 
     def _show_update_dialog(self, msg, url):
         if messagebox.askyesno(self.t("update_title"), msg):
             webbrowser.open(url or "https://github.com/MrTOgRaS/Audio-Delay-Detector/releases/")
 
-    # ── FFmpeg Ayarları ──────────────────────────────────────────────────────
     def _show_ffmpeg_settings(self):
         w = tk.Toplevel(self.root)
         w.title(self.t("ffmpeg_settings_title"))
@@ -1224,7 +1212,6 @@ class AudioDelayApp:
                   relief="flat", padx=16, pady=7,
                   cursor="hand2").pack(pady=(0, 16))
 
-    # ── Analiz Başlat / İptal ─────────────────────────────────────────────────
     def _start(self):
         if not self.audio1_path.get():
             messagebox.showwarning(self.t("warn_title"),
@@ -1237,6 +1224,8 @@ class AudioDelayApp:
         self._cancelled = False
         self.analyze_btn.configure(state="disabled",
                                    text=self.t("btn_analyzing"))
+        self.quick_btn.configure(state="disabled")
+        self.manual_btn.configure(state="disabled")
         self.cancel_btn.configure(state="normal")
         self.progress.start(10)
         for lbl, _ in [(self.lbl_ms, None), (self.lbl_fmt, None),
@@ -1245,6 +1234,30 @@ class AudioDelayApp:
         self._analysis_thread = threading.Thread(
             target=self._run_analysis, daemon=True)
         self._analysis_thread.start()
+
+    def _start_quick_analysis(self):
+        if not self.audio1_path.get():
+            messagebox.showwarning(self.t("warn_title"),
+                                   self.t("warn_no_main"))
+            return
+        if not self.audio2_path.get():
+            messagebox.showwarning(self.t("warn_title"),
+                                   self.t("warn_no_dub"))
+            return
+
+        self._cancelled = False
+        self.quick_btn.configure(state="disabled",
+                                 text=self.t("btn_quick_running"))
+        self.analyze_btn.configure(state="disabled")
+        self.manual_btn.configure(state="disabled")
+        self.cancel_btn.configure(state="normal")
+        self.progress.start(10)
+
+        threading.Thread(
+            target=self._run_manual_search,
+            args=(600, 630, 10, False),
+            kwargs={"quick": True},
+            daemon=True).start()
 
     def _cancel(self):
         self._cancelled = True
@@ -1255,7 +1268,6 @@ class AudioDelayApp:
         if self._cancelled:
             raise InterruptedError("Cancelled")
 
-    # ── Manuel Arama ─────────────────────────────────────────────────────────
     def _toggle_manual_panel(self):
         if self.manual_enabled.get():
             self._manual_inner.pack(fill="x")
@@ -1269,7 +1281,6 @@ class AudioDelayApp:
             self.range_frame.pack_forget()
 
     def _fmt_time(self, total_sec):
-        """Saniyeyi sa:dk:sn formatına çevirir."""
         h = int(total_sec) // 3600
         m = (int(total_sec) % 3600) // 60
         s = int(total_sec) % 60
@@ -1301,6 +1312,9 @@ class AudioDelayApp:
         self._cancelled = False
         self.manual_btn.configure(state="disabled",
                                   text=self.t("manual_searching"))
+        self.analyze_btn.configure(state="disabled")
+        self.quick_btn.configure(state="disabled")
+        self.cancel_btn.configure(state="normal")
         self.progress.start(10)
         
         is_compare = (self.manual_type_var.get() == "compare")
@@ -1310,9 +1324,9 @@ class AudioDelayApp:
             args=(start_sec, end_sec, search_range, is_compare),
             daemon=True).start()
 
-    def _run_manual_search(self, start_sec, end_sec, range_min, is_compare=False):
+    def _run_manual_search(self, start_sec, end_sec, range_min, is_compare=False, quick=False):
         try:
-            self._log(self.t("manual_log_start"), "accent")
+            self._log(self.t("quick_log_start") if quick else self.t("manual_log_start"), "accent")
             self._log(self.t("manual_log_range").format(
                 self._fmt_time(start_sec), self._fmt_time(end_sec)), "default")
                 
@@ -1330,7 +1344,7 @@ class AudioDelayApp:
                 self._log(self.t("manual_loading_dub"), "default")
                 dub_window, sr2 = self._load(self.audio2_path.get(), start_sec=start_sec, duration_sec=duration_main)
                 self._check_cancel()
-                window_start = start_sec # Aynı yerden alındıkları için window offset'i yoktur.
+                window_start = start_sec
             else:
                 self._log(self.t("manual_log_search").format(range_min), "default")
                 
@@ -1363,7 +1377,6 @@ class AudioDelayApp:
             excerpt = excerpt.astype(np.float64)
             dub_window = dub_window.astype(np.float64)
 
-            # --- DİYALOG (İNSAN SESİ) FİLTRELEME (100% Dublaj Senkronizasyonu İçin) ---
             if mode_key in ["old", "anim"]:
                 self._log("M&E Filtresi: İnsan sesi frekansları siliniyor...", "ok")
                 excerpt = self._apply_me_filter(excerpt, sr, mode_key)
@@ -1399,7 +1412,6 @@ class AudioDelayApp:
             delay_sec = match_sec - start_sec
             raw_delay_ms = int(round(delay_sec * 1000))
 
-            # --- MKVToolNix / Premiere STANDART DÜZELTMESİ ---
             delay_ms = raw_delay_ms
 
             self._log(self.t("manual_log_result").format(delay_ms), "ok")
@@ -1415,7 +1427,10 @@ class AudioDelayApp:
             else:
                 direction = self.t("manual_dir_sync")
 
-            title_used = self.t("manual_mode_compare") if is_compare else self.t("manual_title")
+            if quick:
+                title_used = self.t("quick_title")
+            else:
+                title_used = self.t("manual_mode_compare") if is_compare else self.t("manual_title")
             self.root.after(0, self._show_results, delay_ms, fmt, direction, title_used)
 
         except InterruptedError:
@@ -1428,11 +1443,8 @@ class AudioDelayApp:
             self.root.after(0, self._done_manual)
 
     def _done_manual(self):
-        self.progress.stop()
-        self.manual_btn.configure(state="normal",
-                                  text=self.t("manual_btn"))
+        self._done()
 
-    # ── Ana Analiz Thread ────────────────────────────────────────────────────
     def _run_analysis(self):
         try:
             self._log(self.t("btn_analyzing"), "accent")
@@ -1447,25 +1459,26 @@ class AudioDelayApp:
             mode_key = self.mode_var.get()
             tune = TUNING.get((engine_key, mode_key), TUNING[("auto", "new")])
 
-            # AKILLI KESİT (SMART CHUNKING) Optimizasyonu
-            start_time = 600  # 10. Dakika
-            duration = 180    # 3 Dakika boyunca ara
+            start_time = 600
+            duration = 180
 
             self._log(f"Optimizasyon: Filmin sadece 10:00 - 13:00 arası analiz ediliyor...", "default")
 
             self._log(self.t("loading_main"), "default")
             y1, sr1 = self._load(self.audio1_path.get(), start_sec=start_time, duration_sec=duration)
             self._check_cancel()
-            
-            # Eğer dosya 10 dakikadan kısaysa FFmpeg muhtemelen çok kısa veya boş dönecektir, bu durumda baştan alalım.
-            if len(y1) < sr1 * 5:
-                self._log("Video süresi kısa görünüyor, baştan analiz ediliyor...", "warn")
-                y1, sr1 = self._load(self.audio1_path.get(), start_sec=0, duration_sec=duration)
-                start_time = 0
 
             self._log(self.t("loading_dub"), "default")
             y2, sr2 = self._load(self.audio2_path.get(), start_sec=start_time, duration_sec=duration)
             self._check_cancel()
+
+            if len(y1) < sr1 * 5 or len(y2) < sr2 * 5:
+                self._log(self.t("analysis_reload_zero"), "warn")
+                y1, sr1 = self._load(self.audio1_path.get(), start_sec=0, duration_sec=duration)
+                self._check_cancel()
+                y2, sr2 = self._load(self.audio2_path.get(), start_sec=0, duration_sec=duration)
+                self._check_cancel()
+                start_time = 0
 
             if sr1 != sr2:
                 self._log(self.t("diff_sr").format(sr1, sr2), "warn")
@@ -1479,7 +1492,12 @@ class AudioDelayApp:
             y2 = y2.astype(np.float64)
             self._check_cancel()
 
-            # --- DİYALOG (İNSAN SESİ) FİLTRELEME (100% Dublaj Senkronizasyonu İçin) ---
+            if (len(y1) < sr * 1 or len(y2) < sr * 1
+                    or np.max(np.abs(y1)) < 0.005 or np.max(np.abs(y2)) < 0.005):
+                self._log(self.t("analysis_no_audio"), "err")
+                self.root.after(0, self._done)
+                return
+
             if mode_key in ["old", "anim"]:
                 self._log("M&E Filtresi: İnsan sesi frekansları siliniyor...", "ok")
                 y1 = self._apply_me_filter(y1, sr, mode_key)
@@ -1504,7 +1522,6 @@ class AudioDelayApp:
             else:
                 raw_delay_ms = 0.0
 
-            # --- MKVToolNix / Premiere STANDART DÜZELTMESİ ---
             delay_ms = int(round(raw_delay_ms))
 
             fmt = self._fmt_delay(abs(delay_ms))
@@ -1534,7 +1551,6 @@ class AudioDelayApp:
             self._log(tb.format_exc(), "err")
             self.root.after(0, self._done)
 
-    # ── Ses Yükleme ──────────────────────────────────────────────────────────
 
     VIDEO_EXTS = {".mkv", ".mp4", ".avi", ".webm", ".ts"}
 
@@ -1590,6 +1606,17 @@ class AudioDelayApp:
             except OSError:
                 pass
 
+    def _trim_to_window(self, y, sr, start_sec, duration_sec):
+        if start_sec is None and duration_sec is None:
+            return y
+        start_sample = int(round((start_sec or 0) * sr))
+        start_sample = max(0, min(start_sample, len(y)))
+        if duration_sec is not None:
+            end_sample = min(len(y), start_sample + int(round(duration_sec * sr)))
+        else:
+            end_sample = len(y)
+        return y[start_sample:end_sample]
+
     def _load(self, path: str, start_sec=None, duration_sec=None):
         ext = os.path.splitext(path)[1].lower()
         file_size = 0
@@ -1624,6 +1651,8 @@ class AudioDelayApp:
                 samples = np.array(seg.get_array_of_samples(),
                                    dtype=np.float32)
                 samples /= float(2 ** (seg.sample_width * 8 - 1))
+                samples = self._trim_to_window(samples, seg.frame_rate,
+                                               start_sec, duration_sec)
                 self._log(self.t("load_pydub_ok").format(seg.frame_rate), "ok")
                 return samples, seg.frame_rate
             except Exception as e:
@@ -1633,6 +1662,7 @@ class AudioDelayApp:
                 y, sr = sf.read(path, always_2d=False)
                 if y.ndim > 1:
                     y = y.mean(axis=1)
+                y = self._trim_to_window(y, sr, start_sec, duration_sec)
                 self._log(self.t("load_sf_ok").format(sr), "ok")
                 return y.astype(np.float32), sr
             except Exception as e:
@@ -1641,24 +1671,19 @@ class AudioDelayApp:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 y, sr = librosa.load(path, sr=None, mono=True)
+            y = self._trim_to_window(y, sr, start_sec, duration_sec)
             self._log(self.t("load_librosa_ok").format(sr), "ok")
             return y, sr
         raise RuntimeError(self.t("load_none"))
 
-    # ═══════════════════════════════════════════════════════════════════════
-    #  YARDIMCI METOTLAR
-    # ═══════════════════════════════════════════════════════════════════════
 
     def _apply_me_filter(self, data, sr, mode="old"):
-        """İnsan sesini SİLER (Bandstop filtre). Sadece patlama, müzik ve çevre seslerini bırakır."""
         nyq = 0.5 * sr
-        low = 300 / nyq
-        
         if mode == "old":
-            high = 3500 / nyq  # Daha sert kesim
+            low, high = 500 / nyq, 2800 / nyq
         else: # anim
-            high = 3000 / nyq  # Biraz daha yumuşak
-            
+            low, high = 300 / nyq, 3000 / nyq
+
         b, a = signal.butter(4, [low, high], btype='bandstop', analog=False)
         return signal.filtfilt(b, a, data)
 
@@ -1735,9 +1760,6 @@ class AudioDelayApp:
             int(round(fine_ms)), coarse_ms, fine_range_ms), "ok")
         return fine_ms, fine_lag
 
-    # ═══════════════════════════════════════════════════════════════════════
-    #  MOTOR 1 — GCC-PHAT Segmented
-    # ═══════════════════════════════════════════════════════════════════════
     def _eng_gcc_phat(self, sig1, sig2, sr, tune):
         self._log(self.t("eng_gcc"), "accent")
         seg_sec     = tune["seg_sec"]
@@ -1785,9 +1807,6 @@ class AudioDelayApp:
         final_s = int(round((final_ms / 1000.0) * sr))
         return final_ms, final_s
 
-    # ═══════════════════════════════════════════════════════════════════════
-    #  MOTOR 2 — Envelope XCorr
-    # ═══════════════════════════════════════════════════════════════════════
     def _eng_envelope(self, sig1, sig2, sr, tune):
         self._log(self.t("eng_env"), "accent")
         frame_ms  = tune["frame_ms"]
@@ -1827,9 +1846,6 @@ class AudioDelayApp:
                 int(round(delay_ms)), lag_f, frame_ms), "ok")
         return delay_ms, lag_samples
 
-    # ═══════════════════════════════════════════════════════════════════════
-    #  MOTOR 3 — NumPy FFT XCorr
-    # ═══════════════════════════════════════════════════════════════════════
     def _eng_numpy(self, sig1, sig2, sr, tune):
         self._log(self.t("eng_numpy"), "accent")
         n    = len(sig1) + len(sig2)
@@ -1839,9 +1855,6 @@ class AudioDelayApp:
         self._log(self.t("numpy_result").format(int(round(delay_ms))), "ok")
         return delay_ms, lag
 
-    # ═══════════════════════════════════════════════════════════════════════
-    #  MOTOR 4 — SciPy XCorr
-    # ═══════════════════════════════════════════════════════════════════════
     def _eng_scipy(self, sig1, sig2, sr, tune):
         self._log(self.t("eng_scipy"), "accent")
         corr = signal.correlate(sig1, sig2, mode="full", method="fft")
@@ -1859,9 +1872,6 @@ class AudioDelayApp:
             int(round(delay_ms)), MAX_DELAY_MS/1000), "ok")
         return delay_ms, lag
 
-    # ═══════════════════════════════════════════════════════════════════════
-    #  MOTOR 5 — Çoklu Özellik (Onset + HPSS + Chroma) + İnce Ayar
-    # ═══════════════════════════════════════════════════════════════════════
     def _eng_multi(self, sig1, sig2, sr, tune, mode=None):
         self._log(self.t("eng_multi"), "accent")
         hop           = tune["hop"]
@@ -1982,9 +1992,6 @@ class AudioDelayApp:
                 int(round(final_ms))), "warn")
         return final_ms, final_s
 
-    # ═══════════════════════════════════════════════════════════════════════
-    #  MOTOR 6 — 2 Aşamalı (RMS Kaba + FFT İnce)
-    # ═══════════════════════════════════════════════════════════════════════
     def _eng_two_pass(self, sig1, sig2, sr, tune):
         self._log(self.t("eng_two"), "accent")
         frame_ms      = tune["frame_ms"]
@@ -2029,9 +2036,6 @@ class AudioDelayApp:
                 int(round(final_ms))), "warn")
         return final_ms, final_s
 
-    # ═══════════════════════════════════════════════════════════════════════
-    #  MOTOR 7 — Otomatik (Akıllı Analiz)
-    # ═══════════════════════════════════════════════════════════════════════
 
     def _vad_binary_mask(self, sig, sr, frame_ms=30):
         frame_len = max(1, int(frame_ms / 1000.0 * sr))
@@ -2091,7 +2095,6 @@ class AudioDelayApp:
         min_len      = min(len(y1), len(y2))
         results      = []
 
-        # ── Yöntem 1: VAD ──
         self._log(self.t("vad_title"), "accent")
         self._log(self.t("vad_desc"), "default")
         self._check_cancel()
@@ -2104,7 +2107,6 @@ class AudioDelayApp:
                 int(round(d_vad)), c_vad), "ok")
             results.append((d_vad, c_vad, "VAD"))
 
-        # ── Yöntem 2: Enerji Zarfı ──
         self._log(self.t("env_title"), "accent")
         self._check_cancel()
         env1 = self._env_macro(y1[:min_len], sr, env_frame_ms)
@@ -2116,7 +2118,6 @@ class AudioDelayApp:
                 int(round(d_env)), c_env), "ok")
             results.append((d_env, c_env, "Energy Envelope"))
 
-        # ── Yöntem 3: HPSS ──
         self._log(self.t("hpss_title"), "accent")
         self._check_cancel()
         if LIBROSA_AVAILABLE:
@@ -2143,7 +2144,6 @@ class AudioDelayApp:
         else:
             self._log(self.t("hpss_no_librosa"), "warn")
 
-        # ── Yöntem 4: Onset ──
         if LIBROSA_AVAILABLE:
             self._log(self.t("onset_title"), "accent")
             self._check_cancel()
@@ -2162,7 +2162,6 @@ class AudioDelayApp:
             except Exception as e:
                 self._log(f"{self.t('onset_fail')}{e}", "warn")
 
-        # ═══ KONSENSÜS ═══
         self._log("═" * 52, "accent")
         self._log(self.t("consensus"), "accent")
         self._check_cancel()
@@ -2192,9 +2191,8 @@ class AudioDelayApp:
         else:
             final_ms = best[0]
 
-        # ═══ DRIFT ═══
         drift_warning = False
-        if drift_check and min_len > sr * 180:
+        if drift_check and min_len > sr * 150:
             self._log(self.t("drift_title"), "accent")
             self._check_cancel()
             seg_dur = min(60 * sr, min_len // 3)
@@ -2233,7 +2231,6 @@ class AudioDelayApp:
                 else:
                     self._log(self.t("drift_none").format(drift), "ok")
 
-        # ═══ SYNC UYARISI ═══
         if len(results) >= 3 and len(agree) <= 1:
             self._log("", "default")
             self._log("⚠️" * 20, "warn")
@@ -2254,9 +2251,7 @@ class AudioDelayApp:
             self._log(self.t("drift_active"), "warn")
         return final_ms, final_s
 
-    # ── Zaman Formatlama ─────────────────────────────────────────────────────
-    @staticmethod
-    def _fmt_delay(ms: float) -> str:
+    def _fmt_delay(self, ms: float) -> str:
         total = int(abs(ms))
         h     = total // 3_600_000;  r    = total % 3_600_000
         m     = r    //    60_000;   r    = r     %    60_000
@@ -2265,9 +2260,8 @@ class AudioDelayApp:
             return f"{h:02d}:{m:02d}:{s:02d}.{ms_r:03d}"
         if m:
             return f"{m:02d}:{s:02d}.{ms_r:03d}"
-        return f"{s:02d}.{ms_r:03d} sn"
+        return f"{s:02d}.{ms_r:03d} {self.t('unit_sec')}"
 
-    # ── Sonuç Göster ─────────────────────────────────────────────────────────
     def _show_results(self, delay_ms, fmt, direction, eng_label):
         abs_ms = abs(delay_ms)
         color  = (GREEN if abs_ms < 100
@@ -2300,21 +2294,21 @@ class AudioDelayApp:
         self._cancelled = False
         self.analyze_btn.configure(state="normal",
                                    text=self.t("btn_start"))
+        self.quick_btn.configure(state="normal",
+                                 text=self.t("btn_quick"))
         self.cancel_btn.configure(state="disabled")
         self.manual_btn.configure(state="normal",
                                   text=self.t("manual_btn"))
 
-    # ── Hakkında (Butonlu — resme benzer) ─────────────────────────────────
     def _show_about(self):
         w = tk.Toplevel(self.root)
         w.title(self.t("about_title"))
-        w.geometry("500x780")
+        w.geometry("500x810")
         w.configure(bg=CARD)
         w.resizable(False, False)
         w.transient(self.root)
         w.grab_set()
 
-        # Başlık
         tk.Label(w, text="🎵  Audio Delay Detector",
                  bg=CARD, fg=TEXT,
                  font=("Segoe UI", 16, "bold")).pack(pady=(22, 4))
@@ -2322,11 +2316,9 @@ class AudioDelayApp:
                  bg=CARD, fg=MUTED, font=("Segoe UI", 9)).pack()
         tk.Frame(w, bg=BORDER, height=1).pack(fill="x", padx=24, pady=14)
 
-        # ── Geliştirici ──
         tk.Label(w, text=f"👨‍💻  {self.t('about_dev')}:  {self.t('about_dev_val')}",
                  bg=CARD, fg=TEXT, font=("Segoe UI", 11)).pack(pady=(0, 10))
 
-        # ── Butonlar (Web / GitHub / E-Posta) ──
         btn_frame = tk.Frame(w, bg=CARD)
         btn_frame.pack(fill="x", padx=36, pady=(0, 4))
 
@@ -2350,7 +2342,6 @@ class AudioDelayApp:
 
         tk.Frame(w, bg=BORDER, height=1).pack(fill="x", padx=24, pady=10)
 
-        # ── MIT Lisansı / Program Bilgileri / Güncelleme / Bağış ──
         btn_frame2 = tk.Frame(w, bg=CARD)
         btn_frame2.pack(fill="x", padx=36, pady=(0, 4))
 
@@ -2366,7 +2357,6 @@ class AudioDelayApp:
                   relief="flat", padx=16, pady=7,
                   cursor="hand2").pack(fill="x", pady=(0, 5))
 
-        # YENİ EKLENEN: Güncellemeleri Kontrol Et Butonu (Düzeltildi)
         tk.Button(btn_frame2, text=self.t("about_update_btn"),
                   command=self._check_updates,
                   bg=BTN_BG, fg=GREEN, font=("Segoe UI", 10, "bold"),
@@ -2381,7 +2371,6 @@ class AudioDelayApp:
 
         tk.Frame(w, bg=BORDER, height=1).pack(fill="x", padx=24, pady=10)
 
-        # ── Kütüphaneler (basit etiketler, link yok) ──
         tk.Label(w, text=self.t("about_libs"),
                  bg=CARD, fg=MUTED, font=("Segoe UI", 9, "bold")).pack()
         libs_frame = tk.Frame(w, bg=CARD)
@@ -2398,14 +2387,14 @@ class AudioDelayApp:
 
         tk.Frame(w, bg=BORDER, height=1).pack(fill="x", padx=24, pady=10)
 
-        # ── Desteklenen Formatlar ──
         tk.Label(w, text=self.t("about_formats"),
                  bg=CARD, fg=MUTED, font=("Segoe UI", 9, "bold")).pack()
         fmt_frame = tk.Frame(w, bg=CARD)
         fmt_frame.pack(pady=(4, 0))
-        formats_row1 = ["MKV", "MP4", "AVI", "MOV", "WMV"]
-        formats_row2 = ["MP3", "FLAC", "AAC", "AC3", "EAC3", "DTS", "WAV"]
-        for row_formats in [formats_row1, formats_row2]:
+        formats_row1 = ["MKV", "MP4", "AVI", "WEBM", "TS"]
+        formats_row2 = ["MP3", "FLAC", "AAC", "AC3", "EAC3", "EC3", "DTS"]
+        formats_row3 = ["WAV", "M4A", "OGG", "WMA"]
+        for row_formats in [formats_row1, formats_row2, formats_row3]:
             row = tk.Frame(fmt_frame, bg=CARD)
             row.pack(pady=2)
             for fmt in row_formats:
@@ -2413,14 +2402,12 @@ class AudioDelayApp:
                          font=("Consolas", 8, "bold"),
                          padx=8, pady=2).pack(side="left", padx=2)
 
-        # ── Kapat ──
         tk.Frame(w, bg=BORDER, height=1).pack(fill="x", padx=24, pady=8)
         tk.Button(w, text=self.t("about_close"),
                   command=w.destroy,
                   bg=BTN_BG, fg=TEXT, relief="flat",
                   padx=16, pady=6, cursor="hand2").pack(pady=(0, 10))
 
-    # ── Program Bilgileri penceresi ────────────────────────────────────────
     def _show_program_info(self, parent):
         w = tk.Toplevel(parent)
         w.title(self.t("about_info_title"))
@@ -2434,33 +2421,31 @@ class AudioDelayApp:
                  bg=CARD, fg=TEXT,
                  font=("Segoe UI", 14, "bold")).pack(pady=(16, 8))
 
-        # Kombine bilgi
         tk.Label(w, text=self.t("about_combo"),
                  bg=CARD, fg=ACCENT,
                  font=("Segoe UI", 11, "bold")).pack(pady=(4, 10))
 
         tk.Frame(w, bg=BORDER, height=1).pack(fill="x", padx=24, pady=4)
 
-        # Motorlar
         tk.Label(w, text=self.t("about_engines"),
                  bg=CARD, fg=MUTED, font=("Segoe UI", 10, "bold")).pack(pady=(8, 4))
         engines_frame = tk.Frame(w, bg=CARD)
         engines_frame.pack(pady=(0, 6))
-        engines = ["GCC-PHAT", "Envelope", "NumPy FFT", "SciPy", "Multi Feature", "2-Pass"]
+        engines = ["GCC-PHAT", "Envelope", "NumPy FFT", "SciPy",
+                   "Multi Feature", "2-Pass", "⭐ Auto"]
         eng_row = tk.Frame(engines_frame, bg=CARD)
         eng_row.pack()
-        for eng in engines[:3]:
+        for eng in engines[:4]:
             tk.Label(eng_row, text=eng, bg=BTN_BG, fg=ACCENT,
                      font=("Consolas", 9), padx=8, pady=3).pack(side="left", padx=3)
         eng_row2 = tk.Frame(engines_frame, bg=CARD)
         eng_row2.pack(pady=(4, 0))
-        for eng in engines[3:]:
+        for eng in engines[4:]:
             tk.Label(eng_row2, text=eng, bg=BTN_BG, fg=ACCENT,
                      font=("Consolas", 9), padx=8, pady=3).pack(side="left", padx=3)
 
         tk.Frame(w, bg=BORDER, height=1).pack(fill="x", padx=24, pady=8)
 
-        # Modlar
         tk.Label(w, text=self.t("about_modes"),
                  bg=CARD, fg=MUTED, font=("Segoe UI", 10, "bold")).pack(pady=(4, 4))
         for mode_key in ["about_modes_old", "about_modes_anim", "about_modes_new"]:
@@ -2474,7 +2459,6 @@ class AudioDelayApp:
                   bg=BTN_BG, fg=TEXT, relief="flat",
                   padx=16, pady=6, cursor="hand2").pack(pady=(0, 12))
 
-    # ── MIT Lisansı penceresi ─────────────────────────────────────────────
     def _show_mit_license(self, parent):
         w = tk.Toplevel(parent)
         w.title(self.t("mit_title"))
@@ -2501,7 +2485,6 @@ class AudioDelayApp:
                   padx=16, pady=6, cursor="hand2").pack(pady=(0, 12))
 
 
-# ── Başlangıç ────────────────────────────────────────────────────────────────
 def main():
     root = tk.Tk()
     try:
@@ -2510,8 +2493,13 @@ def main():
             base = sys._MEIPASS
         else:
             base = os.path.dirname(os.path.abspath(__file__))
-        ico = os.path.join(base, "icon.ico")
-        if os.path.exists(ico):
+        ico = None
+        for candidate in (os.path.join(base, "assets", "icon.ico"),
+                         os.path.join(base, "icon.ico")):
+            if os.path.exists(candidate):
+                ico = candidate
+                break
+        if ico:
             root.iconbitmap(default=ico)
     except Exception:
         pass
