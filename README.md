@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎵 Audio Delay Detector v1.2
+# 🎵 Audio Delay Detector v1.3
 
 **Precise audio synchronization & dubbing alignment tool**
 
