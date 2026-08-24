@@ -32,13 +32,13 @@ try:
 except ImportError:
     SOUNDFILE_AVAILABLE = False
 
-CURRENT_VERSION_NUM = 1.2
+CURRENT_VERSION_NUM = 1.36
 
 STRINGS = {
     "tr": {
-        "app_title": "🎵  Audio Delay Detector  v1.2  —  MrTOgRaS",
+        "app_title": "🎵  Audio Delay Detector  v1.3  —  MrTOgRaS",
         "header_title": "🎵  Audio Delay Detector",
-        "header_version": " v1.2",
+        "header_version": " v1.3",
         "main_audio": "🔊  Ana Ses / Video",
         "main_audio_sub": "Film dosyası (MKV/MP4) veya ses dosyası",
         "dub_audio": "🎤  Dublaj Ses",
@@ -119,6 +119,30 @@ STRINGS = {
         "eng_scipy": "── Motor: SciPy XCorr ──",
         "eng_multi": "── Motor: Çoklu Özellik (Onset+HPSS+Chroma) ──",
         "eng_two": "── Motor: 2 Aşamalı (RMS + İnce FFT) ──",
+        "segment": "  Segment {}/{}: {:+d} ms  (güven: {:.1f})",
+        "segments_agree": "  ✅ {}/{} segment uyuştu → {:+d} ms",
+        "fine_result": "  İnce ayar: {:+d} ms  (kaba tahmin: {:+.0f} ms, arama aralığı: ±{:.0f} ms)",
+        "fine_empty": "  ⚠️ İnce ayar penceresi boş kaldı, kaba tahmin kullanılıyor",
+        "envelope_offset": "  {:+d} ms  ({}. kare × {:.0f}ms çerçeve, {:+.0f}ms ofset uygulandı)",
+        "envelope_result": "  {:+d} ms  ({}. kare × {:.0f}ms çerçeve)",
+        "numpy_result": "  NumPy FFT sonucu: {:+d} ms",
+        "scipy_result": "  SciPy sonucu: {:+d} ms  (arama sınırı: ±{:.0f} sn)",
+        "onset_corr": "  Yöntem: Onset (Nota Başlangıcı) Korelasyonu",
+        "hpss_perc": "  Yöntem: HPSS Perküsif Ayrıştırma",
+        "perc_rms": "  Yöntem: Perküsif RMS Analizi",
+        "perc_rms_fail": "  ⚠️ Perküsif RMS analizi başarısız: ",
+        "librosa_runtime_fail": "  ⚠️ librosa çalışma zamanında başarısız oldu (numba/numpy uyumsuzluğu olabilir), Spektral Akı'ya düşülüyor: ",
+        "rms_env": "  Yöntem: RMS Zarfı Analizi",
+        "chromagram": "  Yöntem: Kroma (Nota/Ton) Analizi",
+        "no_librosa_flux": "  ⚠️ librosa bulunamadı — Spektral Akı (Spectral Flux) yöntemine geçiliyor",
+        "summary": "  📊 Yöntem Özeti",
+        "methods_agree": "  ✅ {}/{} yöntem uyuştu → {:+d} ms",
+        "fine_tune": "  İnce Ayar (Fine-Tune) uygulanıyor",
+        "fine_drift": "  ⚠️ İnce ayar kaba tahminden çok saptı, kaba tahmin kullanılıyor: {:+d} ms",
+        "coarse_label": "  1. Aşama: Kaba Tahmin (RMS Zarfı)",
+        "coarse_result": "  Kaba tahmin: {:+d} ms  ({}. kare × {:.0f}ms çerçeve)",
+        "fine_phase2": "  2. Aşama: İnce Ayar (Fine-Tune)",
+        "fine_ok": "  ✅ İnce ayar tamamlandı: {:+d} ms",
         "eng_auto_title": "⭐ Motor: Otomatik Akıllı Analiz",
         "eng_auto_raw": "  Sinyaller inceleniyor...",
         "vad_title": "─── Yöntem 1: VAD Sessizlik Deseni ───",
@@ -147,6 +171,7 @@ STRINGS = {
         "drift_fix": "  Tek delay senkronize EDEMEZ.",
         "drift_solution": "  Çözüm: fps eşleştir veya time-stretch uygula.",
         "drift_none": "  ✅ Drift yok (fark: {:.0f} ms)",
+        "drift_insufficient": "  ⚠️ Segmentlerin çoğunda güven düşük - drift hakkında güvenilir bir sonuca varılamadı",
         "sync_warn_title": "  ⛔ SENKRONİZASYON UYARISI",
         "sync_warn_desc": "  Yöntemler tutarsız sonuçlar veriyor.",
         "sync_warn_hint": "  Bu ses basit delay ile senkronlanamayabilir.",
@@ -175,7 +200,7 @@ STRINGS = {
         "sample_info": "  → {:.2f} sn  |  {} Hz  |  {:,} örnek",
         "manual_title": "🎯  Manuel Arama",
         "quick_title": "⚡  Hızlı Analiz",
-        "quick_log_start": "─── ⚡ Hızlı Analiz (10:00'dan 30 sn kesit + ±10 dk tarama) ───",
+        "quick_log_start": "─── ⚡ Hızlı Analiz (10:00 - 13:00 arası sabit bölge, v1.0 Akıllı Ritim yöntemi) ───",
         "analysis_no_audio": "⚠️ HATA: Analiz edilecek bölgede yeterli/geçerli ses bulunamadı! (Dosya çok kısa veya sessiz olabilir)",
         "analysis_reload_zero": "⚠️ Dosyalardan biri 10 dakikadan kısa görünüyor, ikisi de baştan (0:00) hizalı olarak yeniden yükleniyor...",
         "manual_desc": "Özel analiz aralığı belirle (Hedef bölge araması veya Aralık kıyaslama)",
@@ -198,7 +223,8 @@ STRINGS = {
         "manual_log_pos": "  Eşleşen konum (dublajda): {}",
         "manual_warn_time": "Geçersiz zaman formatı!",
         "manual_warn_range": "Bitiş zamanı başlangıçtan büyük olmalı!",
-        "manual_tip_short": "💡 İpucu: Farklı dillerde 30 saniyeden kısa süre seçmek benzerlik yanılmalarına yol açabilir.",
+        "manual_tip_short": "💡 İpucu: 120 saniyeden kısa kesitler geniş aramada yanlış eşleşmeye açık (gerçek veriyle doğrulandı) - kesit otomatik genişletiliyor.",
+        "manual_widened": "  Kesit {} sn'den {} sn'ye genişletildi (başlangıç noktası korunarak) - güvenilirlik için.",
         "manual_loading_main": "Ana sesten hedef bölge alınıyor...",
         "manual_no_audio": "⚠️ HATA: Seçtiğiniz bölgede ses yok!",
         "manual_loading_dub": "Dublajdan bölgesel ses alınıyor...",
@@ -214,7 +240,7 @@ STRINGS = {
         "about_title": "Hakkında",
         "about_version": f"Versiyon {CURRENT_VERSION_NUM}  —  MrTOgRaS",
         "about_dev": "Geliştirici",
-        "about_dev_val": "Murat Oğraş",
+        "about_dev_val": "Murat Ogras",
         "about_update_btn": "🔄  Güncellemeleri Kontrol Et",
         "about_web_btn": "🌐  Web Sitesi",
         "about_github_btn": "🐙  GitHub Page",
@@ -240,9 +266,9 @@ STRINGS = {
         "update_error": "⚠️ Güncelleme kontrolü sırasında bir hata oluştu.\nİnternet bağlantınızı veya GitHub erişimini kontrol edin.",
     },
     "en": {
-        "app_title": "🎵  Audio Delay Detector  v1.2  —  MrTOgRaS",
+        "app_title": "🎵  Audio Delay Detector  v1.3  —  MrTOgRaS",
         "header_title": "🎵  Audio Delay Detector",
-        "header_version": " v1.2",
+        "header_version": " v1.3",
         "main_audio": "🔊  Main Audio / Video",
         "main_audio_sub": "Movie file (MKV/MP4) or audio file",
         "dub_audio": "🎤  Dubbed Audio",
@@ -323,6 +349,30 @@ STRINGS = {
         "eng_scipy": "── Engine: SciPy XCorr ──",
         "eng_multi": "── Engine: Multi Feature (Onset+HPSS+Chroma) ──",
         "eng_two": "── Engine: 2-Pass (RMS + Fine FFT) ──",
+        "segment": "  Segment {}/{}: {:+d} ms  (confidence: {:.1f})",
+        "segments_agree": "  ✅ {}/{} segments agree → {:+d} ms",
+        "fine_result": "  Fine-tune: {:+d} ms  (coarse estimate: {:+.0f} ms, search range: ±{:.0f} ms)",
+        "fine_empty": "  ⚠️ Fine-tune window was empty, using coarse estimate",
+        "envelope_offset": "  {:+d} ms  (frame {} × {:.0f}ms, {:+.0f}ms offset applied)",
+        "envelope_result": "  {:+d} ms  (frame {} × {:.0f}ms frame size)",
+        "numpy_result": "  NumPy FFT result: {:+d} ms",
+        "scipy_result": "  SciPy result: {:+d} ms  (search limit: ±{:.0f} s)",
+        "onset_corr": "  Method: Onset Correlation",
+        "hpss_perc": "  Method: HPSS Percussive Separation",
+        "perc_rms": "  Method: Percussive RMS Analysis",
+        "perc_rms_fail": "  ⚠️ Percussive RMS analysis failed: ",
+        "librosa_runtime_fail": "  ⚠️ librosa failed at runtime (possible numba/numpy mismatch), falling back to Spectral Flux: ",
+        "rms_env": "  Method: RMS Envelope Analysis",
+        "chromagram": "  Method: Chromagram Analysis",
+        "no_librosa_flux": "  ⚠️ librosa not found — falling back to Spectral Flux method",
+        "summary": "  📊 Method Summary",
+        "methods_agree": "  ✅ {}/{} methods agree → {:+d} ms",
+        "fine_tune": "  Applying Fine-Tune",
+        "fine_drift": "  ⚠️ Fine-tune deviated too far from coarse estimate, using coarse: {:+d} ms",
+        "coarse_label": "  Phase 1: Coarse Estimate (RMS Envelope)",
+        "coarse_result": "  Coarse estimate: {:+d} ms  (frame {} × {:.0f}ms frame size)",
+        "fine_phase2": "  Phase 2: Fine-Tune",
+        "fine_ok": "  ✅ Fine-tune complete: {:+d} ms",
         "eng_auto_title": "⭐ Engine: Automatic Smart Analysis",
         "eng_auto_raw": "  Analyzing signals...",
         "vad_title": "─── Method 1: VAD Silence Pattern ───",
@@ -351,6 +401,7 @@ STRINGS = {
         "drift_fix": "  Single delay CANNOT synchronize.",
         "drift_solution": "  Solution: match fps or apply time-stretch.",
         "drift_none": "  ✅ No drift (diff: {:.0f} ms)",
+        "drift_insufficient": "  ⚠️ Confidence too low on most segments - could not reach a reliable drift conclusion",
         "sync_warn_title": "  ⛔ SYNC WARNING",
         "sync_warn_desc": "  Methods give inconsistent results.",
         "sync_warn_hint": "  This audio may not sync with a simple delay.",
@@ -379,7 +430,7 @@ STRINGS = {
         "sample_info": "  → {:.2f} sec  |  {} Hz  |  {:,} samples",
         "manual_title": "🎯  Manual Search",
         "quick_title": "⚡  Quick Analysis",
-        "quick_log_start": "─── ⚡ Quick Analysis (30-sec clip @ 10:00 + ±10 min scan) ───",
+        "quick_log_start": "─── ⚡ Quick Analysis (fixed 10:00-13:00 region, v1.0 Smart Rhythm method) ───",
         "analysis_no_audio": "⚠️ ERROR: Not enough valid audio found in the analyzed region! (File may be too short or silent)",
         "analysis_reload_zero": "⚠️ One of the files appears shorter than 10 minutes, reloading both aligned from 0:00...",
         "manual_desc": "Custom analysis range (Target Search or Range Comparison)",
@@ -402,7 +453,8 @@ STRINGS = {
         "manual_log_pos": "  Match position (in dub): {}",
         "manual_warn_time": "Invalid time format!",
         "manual_warn_range": "End time must be greater than start time!",
-        "manual_tip_short": "💡 Tip: Selecting less than 30 seconds in different languages may cause similarity artifacts.",
+        "manual_tip_short": "💡 Tip: Excerpts under 120 seconds are prone to false matches in a wide search (confirmed with real data) - the excerpt is auto-widened.",
+        "manual_widened": "  Excerpt widened from {} s to {} s (start point kept) - for reliability.",
         "manual_loading_main": "Extracting target region from main audio...",
         "manual_no_audio": "⚠️ ERROR: No audio in the selected region!",
         "manual_loading_dub": "Extracting regional audio from dub...",
@@ -418,7 +470,7 @@ STRINGS = {
         "about_title": "About",
         "about_version": f"Version {CURRENT_VERSION_NUM}  —  MrTOgRaS",
         "about_dev": "Developer",
-        "about_dev_val": "Murat Oğraş",
+        "about_dev_val": "Murat Ogras",
         "about_update_btn": "🔄  Check for Updates",
         "about_web_btn": "🌐  Website",
         "about_github_btn": "🐙  GitHub Page",
@@ -447,7 +499,7 @@ STRINGS = {
 
 MIT_LICENSE_TEXT = """MIT License
 
-Copyright (c) 2026 MrTOgRaS (Murat Oğraş)
+Copyright (c) 2026 MrTOgRaS (Murat Ogras)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -485,15 +537,17 @@ MODES = [
     ("new",  "🎥"),
 ]
 
-MAX_DELAY_MS = 10_000
+MAX_DELAY_MS = 600_000
+
+WINDOW_SEC = {"old": 900, "anim": 600, "new": 180}
 
 TUNING = {
-    ("gcc_phat", "old"):   {"cap_min": 8, "seg_sec": 20,
-                            "max_lag_pct": 0.25, "phat_beta": 0.3},
-    ("gcc_phat", "anim"):  {"cap_min": 3, "seg_sec": 10,
-                            "max_lag_pct": 0.30, "phat_beta": 0.7},
-    ("gcc_phat", "new"):   {"cap_min": 3, "seg_sec": 15,
-                            "max_lag_pct": 0.25, "phat_beta": 0.5},
+    ("gcc_phat", "old"):   {"cap_min": 8, "seg_sec": 1000,
+                            "max_lag_pct": 0.5, "phat_beta": 0.3},
+    ("gcc_phat", "anim"):  {"cap_min": 3, "seg_sec": 60,
+                            "max_lag_pct": 0.4, "phat_beta": 0.7},
+    ("gcc_phat", "new"):   {"cap_min": 3, "seg_sec": 60,
+                            "max_lag_pct": 0.4, "phat_beta": 0.5},
     ("envelope", "old"):   {"cap_min": 5, "frame_ms": 200},
     ("envelope", "anim"):  {"cap_min": 3, "frame_ms": 150},
     ("envelope", "new"):   {"cap_min": 3, "frame_ms": 100},
@@ -1254,10 +1308,169 @@ class AudioDelayApp:
         self.progress.start(10)
 
         threading.Thread(
-            target=self._run_manual_search,
-            args=(600, 630, 10, False),
-            kwargs={"quick": True},
+            target=self._run_quick_analysis,
             daemon=True).start()
+
+    def _run_quick_analysis(self):
+        try:
+            self._log(self.t("quick_log_start"), "accent")
+
+            mode_key = self.mode_var.get()   # "old" / "anim" / "new"
+            use_me_filter = mode_key in ("old", "anim")
+
+            if self.manual_enabled.get():
+                start_time = self.manual_start_box.get_seconds()
+                custom_duration = self.manual_end_box.get_seconds() - start_time
+                if custom_duration > 0:
+                    duration = custom_duration
+                    self._log(f"Özel Arama: {self._fmt_time(start_time)} - "
+                              f"{self._fmt_time(start_time + duration)} arası "
+                              f"analiz ediliyor ({mode_key} modu)...", "default")
+                else:
+                    self._log(self.t("manual_warn_range"), "warn")
+                    duration = WINDOW_SEC.get(mode_key, 180)
+                    start_time = 600
+                    self._log(f"Optimizasyon: Film {start_time//60}:00'dan itibaren "
+                              f"{duration//60} dakikalık bölge analiz ediliyor "
+                              f"({mode_key} modu)...", "default")
+            else:
+                duration = WINDOW_SEC.get(mode_key, 180)
+                start_time = 600
+                self._log(f"Optimizasyon: Film {start_time//60}:00'dan itibaren "
+                          f"{duration//60} dakikalık bölge analiz ediliyor "
+                          f"({mode_key} modu)...", "default")
+
+            self._log(self.t("loading_main"), "default")
+            y1, sr1 = self._load(self.audio1_path.get(), start_sec=start_time, duration_sec=duration)
+            self._check_cancel()
+
+            self._log(self.t("loading_dub"), "default")
+            y2, sr2 = self._load(self.audio2_path.get(), start_sec=start_time, duration_sec=duration)
+            self._check_cancel()
+
+            if len(y1) < sr1 * 5 or len(y2) < sr2 * 5:
+                self._log(self.t("analysis_reload_zero"), "warn")
+                y1, sr1 = self._load(self.audio1_path.get(), start_sec=0, duration_sec=duration)
+                self._check_cancel()
+                y2, sr2 = self._load(self.audio2_path.get(), start_sec=0, duration_sec=duration)
+                self._check_cancel()
+
+            if sr1 != sr2:
+                self._log(self.t("diff_sr").format(sr1, sr2), "warn")
+                new_len = int(len(y2) * (sr1 / sr2))
+                y2 = np.interp(np.linspace(0, len(y2) - 1, new_len), np.arange(len(y2)), y2).astype(np.float32)
+                sr2 = sr1
+                self._log(self.t("resample_done"), "ok")
+
+            sr = sr1
+            y1 = y1.astype(np.float32)
+            y2 = y2.astype(np.float32)
+            self._check_cancel()
+
+            if (len(y1) < sr * 1 or len(y2) < sr * 1
+                    or np.max(np.abs(y1)) < 0.005 or np.max(np.abs(y2)) < 0.005):
+                self._log(self.t("analysis_no_audio"), "err")
+                self.root.after(0, self._done_manual)
+                return
+
+            if duration > 300:
+                work_hz = 8000
+                decim = max(1, int(round(sr / work_hz)))
+                if decim > 1:
+                    self._log(f"Bellek optimizasyonu: {sr}Hz -> {sr//decim}Hz'e indirgeniyor...", "default")
+                    y1 = signal.decimate(y1, decim, ftype='fir', zero_phase=True)
+                    y2 = signal.decimate(y2, decim, ftype='fir', zero_phase=True)
+                    sr = sr // decim
+                    self._check_cancel()
+
+            if use_me_filter:
+                self._log("M&E Filtresi uygulanıyor (diyalog çıkarılıyor, "
+                          "müzik/efekt bırakılıyor)...", "default")
+                self._check_cancel()
+                y1c = self._apply_me_filter(y1, sr, mode=mode_key)
+                y2c = self._apply_me_filter(y2, sr, mode=mode_key)
+            else:
+                y1c, y2c = y1, y2
+
+            if use_me_filter:
+                self._log("Ses şiddet haritaları (M&E Zarfı) çıkarılıyor...", "default")
+            else:
+                self._log("Ses şiddet haritaları (RMS Zarfı) çıkarılıyor...", "default")
+            self._check_cancel()
+
+            def get_robust_envelope(sig, current_sr, do_voice_bandpass):
+                if do_voice_bandpass:
+                    nyq = current_sr / 2
+                    b, a = signal.butter(3, [300 / nyq, 3000 / nyq], btype='band')
+                    sig_filt = signal.filtfilt(b, a, sig)
+                else:
+                    sig_filt = sig
+
+                target_sr = 100
+                factor = current_sr // target_sr
+                n_frames = len(sig_filt) // factor
+                if n_frames == 0:
+                    return np.zeros(1), target_sr
+
+                sig_cut = sig_filt[:n_frames * factor]
+                energy = np.sqrt(np.mean(sig_cut.reshape(-1, factor) ** 2, axis=1))
+
+                std_val = np.std(energy)
+                if std_val < 1e-10:
+                    return energy, target_sr
+                return (energy - np.mean(energy)) / std_val, target_sr
+
+            env1, work_sr = get_robust_envelope(y1c, sr, not use_me_filter)
+            env2, _ = get_robust_envelope(y2c, sr, not use_me_filter)
+
+            self._log("Çapraz Korelasyon (Cross-Correlation) hesaplanıyor...", "default")
+            self._check_cancel()
+
+            corr = signal.fftconvolve(env2, env1[::-1], mode="full")
+            peak_idx = int(np.argmax(corr))
+
+            match_offset = peak_idx - len(env1) + 1
+            delay_sec = match_offset / work_sr
+            raw_delay_ms = int(round(delay_sec * 1000))
+
+            delay_ms = -raw_delay_ms
+
+            confidence = float(corr[peak_idx]) / (float(np.std(corr)) + 1e-10)
+            self._log(f"Eşleşme güveni: {confidence:.1f}",
+                      "ok" if confidence > 5 else "warn")
+
+            self._log("İnce ayar (Fine-Tune) uygulanıyor...", "default")
+            self._check_cancel()
+            fine_ms, fine_lag = self._fine_align(y1c, y2c, sr, delay_ms, fine_range_ms=500)
+            if abs(fine_ms - delay_ms) <= 500:
+                delay_ms = int(round(fine_ms))
+
+            fmt = self._fmt_delay(abs(delay_ms))
+
+            if delay_ms < -10:
+                direction = self.t("manual_dir_left")
+            elif delay_ms > 10:
+                direction = self.t("manual_dir_right")
+            else:
+                direction = self.t("manual_dir_sync")
+
+            self._log("─" * 52, "default")
+            self._log(self.t("analysis_done"), "ok")
+            self._log(self.t("delay_label").format(delay_ms), "accent")
+            self._log(self.t("format_label").format(fmt), "accent")
+            self._log(self.t("dir_label").format(direction), "accent")
+            self._log("─" * 52, "default")
+
+            self.root.after(0, self._show_results, delay_ms, fmt, direction, self.t("quick_title"))
+
+        except InterruptedError:
+            self._log(self.t("cancelled"), "warn")
+            self.root.after(0, self._done_manual)
+        except Exception as exc:
+            import traceback as tb
+            self._log(f"{self.t('error')}{exc}", "err")
+            self._log(tb.format_exc(), "err")
+            self.root.after(0, self._done_manual)
 
     def _cancel(self):
         self._cancelled = True
@@ -1347,9 +1560,15 @@ class AudioDelayApp:
                 window_start = start_sec
             else:
                 self._log(self.t("manual_log_search").format(range_min), "default")
-                
-                if duration_main < 30:
+
+                MIN_EXCERPT_SEC = 120
+                if duration_main < MIN_EXCERPT_SEC:
                     self._log(self.t("manual_tip_short"), "warn")
+                    old_duration = duration_main
+                    duration_main = MIN_EXCERPT_SEC
+                    end_sec = start_sec + duration_main
+                    self._log(self.t("manual_widened").format(
+                        old_duration, MIN_EXCERPT_SEC), "warn")
 
                 self._log(self.t("manual_loading_main"), "default")
                 excerpt, sr1 = self._load(self.audio1_path.get(), start_sec=start_sec, duration_sec=duration_main)
@@ -1374,8 +1593,18 @@ class AudioDelayApp:
                 self._log(self.t("resample_done"), "ok")
 
             sr = sr1
-            excerpt = excerpt.astype(np.float64)
-            dub_window = dub_window.astype(np.float64)
+            excerpt = excerpt.astype(np.float32)
+            dub_window = dub_window.astype(np.float32)
+
+            if (len(dub_window) / sr) > 300:
+                work_hz = 8000
+                decim = max(1, int(round(sr / work_hz)))
+                if decim > 1:
+                    self._log(f"Bellek optimizasyonu: {sr}Hz -> {sr//decim}Hz'e indirgeniyor...", "default")
+                    excerpt = signal.decimate(excerpt, decim, ftype='fir', zero_phase=True)
+                    dub_window = signal.decimate(dub_window, decim, ftype='fir', zero_phase=True)
+                    sr = sr // decim
+                    self._check_cancel()
 
             if mode_key in ["old", "anim"]:
                 self._log("M&E Filtresi: İnsan sesi frekansları siliniyor...", "ok")
@@ -1388,8 +1617,11 @@ class AudioDelayApp:
             def get_micro_rhythm(sig, current_sr):
                 y_abs = np.abs(sig)
                 target_sr = 1000
-                factor = current_sr // target_sr
-                y_down = y_abs[::factor]
+                factor = max(1, current_sr // target_sr)
+                if factor > 1:
+                    y_down = signal.decimate(y_abs, factor, ftype='fir', zero_phase=True)
+                else:
+                    y_down = y_abs
                 b2, a2 = signal.butter(3, 10 / (target_sr / 2), btype='low')
                 env = signal.filtfilt(b2, a2, y_down)
                 std_val = np.std(env)
@@ -1405,6 +1637,9 @@ class AudioDelayApp:
 
             corr = signal.fftconvolve(dub_env, exc_env[::-1], mode="full")
             peak_idx = int(np.argmax(corr))
+            confidence = float(corr[peak_idx]) / (float(np.std(corr)) + 1e-10)
+            self._log(f"Eşleşme güveni: {confidence:.1f}",
+                      "ok" if confidence > 5 else "warn")
 
             match_offset = peak_idx - len(exc_env) + 1
             match_sec = window_start + (match_offset / work_sr)
@@ -1412,7 +1647,7 @@ class AudioDelayApp:
             delay_sec = match_sec - start_sec
             raw_delay_ms = int(round(delay_sec * 1000))
 
-            delay_ms = raw_delay_ms
+            delay_ms = -raw_delay_ms
 
             self._log(self.t("manual_log_result").format(delay_ms), "ok")
             if not is_compare:
@@ -1459,10 +1694,27 @@ class AudioDelayApp:
             mode_key = self.mode_var.get()
             tune = TUNING.get((engine_key, mode_key), TUNING[("auto", "new")])
 
-            start_time = 600
-            duration = 180
-
-            self._log(f"Optimizasyon: Filmin sadece 10:00 - 13:00 arası analiz ediliyor...", "default")
+            if self.manual_enabled.get():
+                start_time = self.manual_start_box.get_seconds()
+                custom_duration = self.manual_end_box.get_seconds() - start_time
+                if custom_duration > 0:
+                    duration = custom_duration
+                    self._log(f"Özel Arama: {self._fmt_time(start_time)} - "
+                              f"{self._fmt_time(start_time + duration)} arası "
+                              f"analiz ediliyor ({mode_key} modu)...", "default")
+                else:
+                    self._log(self.t("manual_warn_range"), "warn")
+                    start_time = 600
+                    duration = WINDOW_SEC.get(mode_key, 180)
+                    self._log(f"Optimizasyon: Film {start_time//60}:00'dan itibaren "
+                              f"{duration//60} dakikalık bölge analiz ediliyor "
+                              f"({mode_key} modu)...", "default")
+            else:
+                start_time = 600
+                duration = WINDOW_SEC.get(mode_key, 180)
+                self._log(f"Optimizasyon: Film {start_time//60}:00'dan itibaren "
+                          f"{duration//60} dakikalık bölge analiz ediliyor "
+                          f"({mode_key} modu)...", "default")
 
             self._log(self.t("loading_main"), "default")
             y1, sr1 = self._load(self.audio1_path.get(), start_sec=start_time, duration_sec=duration)
@@ -1488,8 +1740,8 @@ class AudioDelayApp:
                 self._log(self.t("resample_done"), "ok")
 
             sr = sr1
-            y1 = y1.astype(np.float64)
-            y2 = y2.astype(np.float64)
+            y1 = y1.astype(np.float32)
+            y2 = y2.astype(np.float32)
             self._check_cancel()
 
             if (len(y1) < sr * 1 or len(y2) < sr * 1
@@ -1497,6 +1749,16 @@ class AudioDelayApp:
                 self._log(self.t("analysis_no_audio"), "err")
                 self.root.after(0, self._done)
                 return
+
+            if duration > 300:
+                work_hz = 8000
+                decim = max(1, int(round(sr / work_hz)))
+                if decim > 1:
+                    self._log(f"Bellek optimizasyonu: {sr}Hz -> {sr//decim}Hz'e indirgeniyor...", "default")
+                    y1 = signal.decimate(y1, decim, ftype='fir', zero_phase=True)
+                    y2 = signal.decimate(y2, decim, ftype='fir', zero_phase=True)
+                    sr = sr // decim
+                    self._check_cancel()
 
             if mode_key in ["old", "anim"]:
                 self._log("M&E Filtresi: İnsan sesi frekansları siliniyor...", "ok")
@@ -1733,11 +1995,24 @@ class AudioDelayApp:
         return d_ms, conf
 
     def _fine_align(self, sig1, sig2, sr, coarse_ms, fine_range_ms):
-        min_len = min(len(sig1), len(sig2))
-        seg_len = min(30 * sr, min_len)
-        mid     = max(0, (min_len - seg_len) // 2)
-        s1 = sig1[mid:mid + seg_len]
-        s2 = sig2[mid:mid + seg_len]
+        coarse_samp = int(round(coarse_ms / 1000.0 * sr))
+
+        seg_len = min(30 * sr, len(sig1))
+        mid1 = max(0, (len(sig1) - seg_len) // 2)
+        mid2 = mid1 - coarse_samp
+
+        if mid2 < 0:
+            mid1 -= mid2
+            mid2 = 0
+        if mid2 + seg_len > len(sig2):
+            overflow = (mid2 + seg_len) - len(sig2)
+            mid1 -= overflow
+            mid2 -= overflow
+        mid1 = max(0, min(mid1, len(sig1) - seg_len))
+        mid2 = max(0, min(mid2, len(sig2) - seg_len))
+
+        s1 = sig1[mid1:mid1 + seg_len]
+        s2 = sig2[mid2:mid2 + seg_len]
         n      = len(s1) + len(s2)
         nfft   = self._next_pow2(n)
         center = nfft // 2
@@ -1745,17 +2020,17 @@ class AudioDelayApp:
         F2    = np.fft.rfft(s2, n=nfft)
         cross = F1 * np.conj(F2)
         cc    = np.fft.fftshift(np.fft.irfft(cross, n=nfft))
-        coarse_samp = int(round(coarse_ms / 1000.0 * sr))
         fine_range  = int((fine_range_ms * 1.5) / 1000.0 * sr)
-        lo = max(0, center + coarse_samp - fine_range)
-        hi = min(len(cc), center + coarse_samp + fine_range + 1)
+        lo = max(0, center - fine_range)
+        hi = min(len(cc), center + fine_range + 1)
         region = cc[lo:hi]
         if len(region) == 0:
             self._log(self.t("fine_empty"), "warn")
             return coarse_ms, coarse_samp
-        pk       = int(np.argmax(region))
-        fine_lag = (lo + pk) - center
-        fine_ms  = (fine_lag / sr) * 1000.0
+        pk         = int(np.argmax(region))
+        local_lag  = (lo + pk) - center
+        fine_lag   = coarse_samp + local_lag
+        fine_ms    = (fine_lag / sr) * 1000.0
         self._log(self.t("fine_result").format(
             int(round(fine_ms)), coarse_ms, fine_range_ms), "ok")
         return fine_ms, fine_lag
@@ -1767,7 +2042,7 @@ class AudioDelayApp:
         phat_beta   = tune.get("phat_beta", 1.0)
         seg_len     = seg_sec * sr
         min_len     = min(len(sig1), len(sig2))
-        n_seg   = max(1, min_len // seg_len)
+        n_seg   = max(1, round(min_len / seg_len))
         results = []
         for i in range(n_seg):
             self._check_cancel()
@@ -1781,7 +2056,8 @@ class AudioDelayApp:
             cc   = self._xcorr_fft(s1, s2, nfft, phat=True,
                                      phat_beta=phat_beta)
             center  = nfft // 2
-            max_lag = int(seg_len * max_lag_pct)
+            max_lag = min(int(seg_len * max_lag_pct),
+                          int(MAX_DELAY_MS / 1000.0 * sr))
             lo = max(0, center - max_lag)
             hi = min(len(cc), center + max_lag + 1)
             region = cc[lo:hi]
@@ -1881,75 +2157,80 @@ class AudioDelayApp:
         s2 = sig2[:min_len]
         frame_ms = (hop / sr) * 1000.0
         results  = []
-        if LIBROSA_AVAILABLE:
-            s1f = s1.astype(np.float32)
-            s2f = s2.astype(np.float32)
-            self._log(self.t("onset_corr"), "accent")
-            o1 = librosa.onset.onset_strength(y=s1f, sr=sr, hop_length=hop)
-            o2 = librosa.onset.onset_strength(y=s2f, sr=sr, hop_length=hop)
-            d1, c1 = self._feature_corr(o1, o2, frame_ms, "Full onset")
-            results.append((d1, c1, "Full onset"))
-            self._log(self.t("hpss_perc"), "accent")
-            D1 = librosa.stft(s1f, n_fft=2048, hop_length=hop)
-            D2 = librosa.stft(s2f, n_fft=2048, hop_length=hop)
-            _, P1 = librosa.decompose.hpss(D1, margin=3.0)
-            _, P2 = librosa.decompose.hpss(D2, margin=3.0)
-            s1p = librosa.istft(P1, hop_length=hop,
-                                length=min_len).astype(np.float32)
-            s2p = librosa.istft(P2, hop_length=hop,
-                                length=min_len).astype(np.float32)
-            o1n = librosa.onset.onset_strength(y=s1p, sr=sr, hop_length=hop)
-            o2n = librosa.onset.onset_strength(y=s2p, sr=sr, hop_length=hop)
-            d2, c2 = self._feature_corr(o1n, o2n, frame_ms,
-                                         "Percussive onset (HPSS)")
-            results.append((d2, c2, "Percussive onset (HPSS)"))
-            self._log(self.t("perc_rms"), "accent")
+        librosa_ok = LIBROSA_AVAILABLE
+        if librosa_ok:
             try:
-                p_rms_win = int(0.05 * sr)
-                n_pr = min(len(s1p), len(s2p)) // p_rms_win
-                if n_pr > 50:
-                    pe1 = np.array([np.sqrt(np.mean(
-                        s1p[j*p_rms_win:(j+1)*p_rms_win] ** 2))
-                        for j in range(n_pr)])
-                    pe2 = np.array([np.sqrt(np.mean(
-                        s2p[j*p_rms_win:(j+1)*p_rms_win] ** 2))
-                        for j in range(n_pr)])
-                    p_frame_ms = p_rms_win / sr * 1000.0
-                    d3, c3 = self._feature_corr(
-                        pe1, pe2, p_frame_ms, "Percussive RMS")
-                    results.append((d3, c3, "Percussive RMS"))
+                s1f = s1.astype(np.float32)
+                s2f = s2.astype(np.float32)
+                self._log(self.t("onset_corr"), "accent")
+                o1 = librosa.onset.onset_strength(y=s1f, sr=sr, hop_length=hop)
+                o2 = librosa.onset.onset_strength(y=s2f, sr=sr, hop_length=hop)
+                d1, c1 = self._feature_corr(o1, o2, frame_ms, "Full onset")
+                results.append((d1, c1, "Full onset"))
+                self._log(self.t("hpss_perc"), "accent")
+                D1 = librosa.stft(s1f, n_fft=2048, hop_length=hop)
+                D2 = librosa.stft(s2f, n_fft=2048, hop_length=hop)
+                _, P1 = librosa.decompose.hpss(D1, margin=3.0)
+                _, P2 = librosa.decompose.hpss(D2, margin=3.0)
+                s1p = librosa.istft(P1, hop_length=hop,
+                                    length=min_len).astype(np.float32)
+                s2p = librosa.istft(P2, hop_length=hop,
+                                    length=min_len).astype(np.float32)
+                o1n = librosa.onset.onset_strength(y=s1p, sr=sr, hop_length=hop)
+                o2n = librosa.onset.onset_strength(y=s2p, sr=sr, hop_length=hop)
+                d2, c2 = self._feature_corr(o1n, o2n, frame_ms,
+                                             "Percussive onset (HPSS)")
+                results.append((d2, c2, "Percussive onset (HPSS)"))
+                self._log(self.t("perc_rms"), "accent")
+                try:
+                    p_rms_win = int(0.05 * sr)
+                    n_pr = min(len(s1p), len(s2p)) // p_rms_win
+                    if n_pr > 50:
+                        pe1 = np.array([np.sqrt(np.mean(
+                            s1p[j*p_rms_win:(j+1)*p_rms_win] ** 2))
+                            for j in range(n_pr)])
+                        pe2 = np.array([np.sqrt(np.mean(
+                            s2p[j*p_rms_win:(j+1)*p_rms_win] ** 2))
+                            for j in range(n_pr)])
+                        p_frame_ms = p_rms_win / sr * 1000.0
+                        d3, c3 = self._feature_corr(
+                            pe1, pe2, p_frame_ms, "Percussive RMS")
+                        results.append((d3, c3, "Percussive RMS"))
+                except Exception as e:
+                    self._log(f"{self.t('perc_rms_fail')}{e}", "warn")
+                self._log(self.t("rms_env"), "accent")
+                RMS_MS  = 100
+                rms_win = int(RMS_MS / 1000 * sr)
+                n_rms   = min_len // rms_win
+                if n_rms > 50:
+                    env1 = np.array([np.sqrt(np.mean(
+                        s1[i*rms_win:(i+1)*rms_win] ** 2))
+                        for i in range(n_rms)])
+                    env2 = np.array([np.sqrt(np.mean(
+                        s2[i*rms_win:(i+1)*rms_win] ** 2))
+                        for i in range(n_rms)])
+                    d4, c4 = self._feature_corr(env1, env2, float(RMS_MS),
+                                                 "RMS envelope")
+                    results.append((d4, c4, "RMS envelope"))
+                self._log(self.t("chromagram"), "accent")
+                ch1 = librosa.feature.chroma_stft(y=s1f, sr=sr, hop_length=hop)
+                ch2 = librosa.feature.chroma_stft(y=s2f, sr=sr, hop_length=hop)
+                best_ch_d, best_ch_c = 0.0, 0.0
+                for pc in range(12):
+                    cd, cc_ = self._feature_corr(
+                        ch1[pc], ch2[pc], frame_ms, f"Chroma {pc:2d}")
+                    if cc_ > best_ch_c:
+                        best_ch_d, best_ch_c = cd, cc_
+                results.append((best_ch_d, best_ch_c, "Chromagram"))
+                ch_sum1 = np.sum(ch1, axis=0)
+                ch_sum2 = np.sum(ch2, axis=0)
+                d6, c6 = self._feature_corr(ch_sum1, ch_sum2, frame_ms,
+                                             "Chroma sum")
+                results.append((d6, c6, "Chroma sum"))
             except Exception as e:
-                self._log(f"{self.t('perc_rms_fail')}{e}", "warn")
-            self._log(self.t("rms_env"), "accent")
-            RMS_MS  = 100
-            rms_win = int(RMS_MS / 1000 * sr)
-            n_rms   = min_len // rms_win
-            if n_rms > 50:
-                env1 = np.array([np.sqrt(np.mean(
-                    s1[i*rms_win:(i+1)*rms_win] ** 2))
-                    for i in range(n_rms)])
-                env2 = np.array([np.sqrt(np.mean(
-                    s2[i*rms_win:(i+1)*rms_win] ** 2))
-                    for i in range(n_rms)])
-                d4, c4 = self._feature_corr(env1, env2, float(RMS_MS),
-                                             "RMS envelope")
-                results.append((d4, c4, "RMS envelope"))
-            self._log(self.t("chromagram"), "accent")
-            ch1 = librosa.feature.chroma_stft(y=s1f, sr=sr, hop_length=hop)
-            ch2 = librosa.feature.chroma_stft(y=s2f, sr=sr, hop_length=hop)
-            best_ch_d, best_ch_c = 0.0, 0.0
-            for pc in range(12):
-                cd, cc_ = self._feature_corr(
-                    ch1[pc], ch2[pc], frame_ms, f"Chroma {pc:2d}")
-                if cc_ > best_ch_c:
-                    best_ch_d, best_ch_c = cd, cc_
-            results.append((best_ch_d, best_ch_c, "Chromagram"))
-            ch_sum1 = np.sum(ch1, axis=0)
-            ch_sum2 = np.sum(ch2, axis=0)
-            d6, c6 = self._feature_corr(ch_sum1, ch_sum2, frame_ms,
-                                         "Chroma sum")
-            results.append((d6, c6, "Chroma sum"))
-        else:
+                self._log(f"{self.t('librosa_runtime_fail')}{e}", "warn")
+                librosa_ok = False
+        if not librosa_ok:
             self._log(self.t("no_librosa_flux"), "warn")
             frame_len = hop
             n_frames  = min_len // frame_len
@@ -1963,6 +2244,19 @@ class AudioDelayApp:
             o2 = spectral_flux(s2)
             d1, c1 = self._feature_corr(o1, o2, frame_ms, "Spectral flux")
             results.append((d1, c1, "Spectral flux"))
+            RMS_MS  = 100
+            rms_win = int(RMS_MS / 1000 * sr)
+            n_rms   = min_len // rms_win
+            if n_rms > 50:
+                env1 = np.array([np.sqrt(np.mean(
+                    s1[i*rms_win:(i+1)*rms_win] ** 2))
+                    for i in range(n_rms)])
+                env2 = np.array([np.sqrt(np.mean(
+                    s2[i*rms_win:(i+1)*rms_win] ** 2))
+                    for i in range(n_rms)])
+                d4, c4 = self._feature_corr(env1, env2, float(RMS_MS),
+                                             "RMS envelope")
+                results.append((d4, c4, "RMS envelope"))
         if not results:
             return 0.0, 0
         results.sort(key=lambda x: x[1], reverse=True)
@@ -2195,7 +2489,8 @@ class AudioDelayApp:
         if drift_check and min_len > sr * 150:
             self._log(self.t("drift_title"), "accent")
             self._check_cancel()
-            seg_dur = min(60 * sr, min_len // 3)
+            needed_sec = (abs(best[0]) / 1000.0) * 1.5
+            seg_dur = min(max(int(needed_sec * sr), 60 * sr), min_len // 3)
             seg_positions = [
                 (self.t("drift_start"), 0),
                 (self.t("drift_mid"),   (min_len - seg_dur) // 2),
@@ -2212,7 +2507,7 @@ class AudioDelayApp:
                         e1, e2, env_frame_ms)
                     self._log(f"  {seg_name:10s}: {int(round(d_seg)):+d} ms  "
                               f"(conf: {c_seg:.1f})", "default")
-                    if c_seg > 3:
+                    if c_seg > 5:
                         drift_results.append(d_seg)
 
             if len(drift_results) >= 2:
@@ -2230,6 +2525,8 @@ class AudioDelayApp:
                     self._log("⚠️" * 20, "err")
                 else:
                     self._log(self.t("drift_none").format(drift), "ok")
+            else:
+                self._log(self.t("drift_insufficient"), "warn")
 
         if len(results) >= 3 and len(agree) <= 1:
             self._log("", "default")
